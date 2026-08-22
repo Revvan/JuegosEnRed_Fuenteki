@@ -30,13 +30,14 @@ public class bulletController : MonoBehaviourPun
     // Update is called once per frame
     void Update()
     {
+        KillBulletCheck();
+
         if (!myView.IsMine)
         { return; }
 
-        ProcessMovement();
     }
 
-    void ProcessMovement()
+    void KillBulletCheck()
     {
         if (lifeStartTime + lifetime <= Time.time)
         {
@@ -45,7 +46,7 @@ public class bulletController : MonoBehaviourPun
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player") && !collision.gameObject.GetComponent<PhotonView>().IsMine)
         {
