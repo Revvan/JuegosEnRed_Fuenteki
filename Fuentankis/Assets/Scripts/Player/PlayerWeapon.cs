@@ -8,7 +8,10 @@ public class PlayerWeapon : MonoBehaviourPun
 
     private PhotonView myView;
 
+    public int count = 0;
 
+    [SerializeField] float fireRate = 0.5f;
+    private float lastFireTime = 0;
 
     void Awake()
     {
@@ -31,7 +34,20 @@ public class PlayerWeapon : MonoBehaviourPun
     {
         if (Keyboard.current != null){
             if (Keyboard.current.spaceKey.isPressed){
-                PhotonNetwork.Instantiate(bulletPrefab.name, transform.position, Quaternion.identity);
+
+                if (lastFireTime + fireRate <= Time.time)
+                {
+                    bulletController bullet = PhotonNetwork.Instantiate(bulletPrefab.name, transform.position, Quaternion.identity).GetComponent<bulletController>();
+                    if (bullet != null)
+                    {
+                        count++;
+                    }
+                    else
+                    {
+                        Debug.Log("Missing bullet instantiation");
+                    }
+                    lastFireTime = Time.time;
+                }
             }
         }
     }

@@ -6,9 +6,14 @@ public class bulletController : MonoBehaviourPun
 {
     private Rigidbody2D rb;
     private PhotonView myView;
+
+
+    [SerializeField] float lifetime = 5.0f;
+    private float lifeStartTime = 0;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
+        lifeStartTime = Time.time;
         rb = GetComponent<Rigidbody2D>();
         myView = GetComponent<PhotonView>();
     }
@@ -31,6 +36,10 @@ public class bulletController : MonoBehaviourPun
 
     void ProcessMovement()
     {
+        if (lifeStartTime + lifetime <= Time.time)
+        {
+             Destroy(this.gameObject);
 
+        }
     }
 }
