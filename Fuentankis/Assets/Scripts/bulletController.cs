@@ -48,8 +48,7 @@ public class bulletController : MonoBehaviourPun
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!myView.IsMine)
-        { return; }
+
 
         Debug.Log("trigger");
 
@@ -57,7 +56,7 @@ public class bulletController : MonoBehaviourPun
         {
             Debug.Log("Player");
 
-            if (!collision.gameObject.GetComponent<PhotonView>().IsMine)
+            if (collision.gameObject.GetComponent<PhotonView>().Owner != myView.Owner)
             {
                 Debug.Log("not mine");
                 LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
