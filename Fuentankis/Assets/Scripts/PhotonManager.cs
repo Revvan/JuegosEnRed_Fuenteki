@@ -1,50 +1,49 @@
-using Photon.Pun;
 using UnityEngine;
+using Photon.Pun;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
+    public delegate void OnRoomCallback();
+    public OnRoomCallback OnRoom;
+
     public static PhotonManager Instance;
-
-    private void Awake()
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Awake()
     {
-        if (Instance == null)
+        if (Instance != null)
         {
-            Instance = this;
+            Destroy(this.gameObject);
+            return;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+        Instance = this;
 
-    private void Start()
-    {
-        ConnectToPhoton();
-    }
+        PhotonNetwork.ConnectUsingSettings();
 
-    public void ConnectToPhoton()
-    {
-        if (!PhotonNetwork.IsConnected)
-        {
-            PhotonNetwork.ConnectUsingSettings();
-        }
     }
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("Connected to Photon Master Server");
+        Debug.Log("Connected to Server");
         PhotonNetwork.JoinLobby();
+
     }
 
     public override void OnJoinedLobby()
     {
-        PhotonNetwork.JoinRandomOrCreateRoom(roomName: "MyRoom");
+        Debug.Log("Joined to Lobby");
+        PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room");
     }
 
     public override void OnJoinedRoom()
     {
-        string roomName = PhotonNetwork.CurrentRoom.Name;
+        Debug.Log("Joined to Room");
+        string roonName = PhotonNetwork.CurrentRoom.Name;
         int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
-        Debug.Log($"Joined room: {roomName} with {playerCount} players");
+        Debug.Log("Room name: " + roonName + " | PlayerCount: " + playerCount);
+        OnRoom();
     }
+
+      
+
+
 }
