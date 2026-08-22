@@ -8,6 +8,8 @@ public class bulletController : MonoBehaviourPun
     private PhotonView myView;
 
 
+    [SerializeField] float damage = 100.0f;
+
     [SerializeField] float lifetime = 5.0f;
     private float lifeStartTime = 0;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -40,6 +42,16 @@ public class bulletController : MonoBehaviourPun
         {
              Destroy(this.gameObject);
 
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && !collision.gameObject.GetComponent<PhotonView>().IsMine)
+        {
+            LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
+   
+            playerLife.ActualLife -= damage;
         }
     }
 }
