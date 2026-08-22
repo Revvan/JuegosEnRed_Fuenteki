@@ -58,4 +58,19 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             NetMaxLife = (float)stream.ReceiveNext();
         }
     }
+
+    public void printShit(string shitiString) {
+        Debug.Log(shitiString);
+    }
+
+
+    public void DealDamage(float damage)
+    {
+        ActualLife -= damage;
+        NetActualLife -= damage;
+
+    }
+
 }
+
+

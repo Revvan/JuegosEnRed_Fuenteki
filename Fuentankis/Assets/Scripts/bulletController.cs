@@ -48,11 +48,24 @@ public class bulletController : MonoBehaviourPun
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player") && !collision.gameObject.GetComponent<PhotonView>().IsMine)
+        if (!myView.IsMine)
+        { return; }
+
+        Debug.Log("trigger");
+
+        if (collision.gameObject.CompareTag("Player") )
         {
-            LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
+            Debug.Log("Player");
+
+            if (!collision.gameObject.GetComponent<PhotonView>().IsMine)
+            {
+                Debug.Log("not mine");
+                LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
+                playerLife.DealDamage(damage);
+                playerLife.printShit("i toched you");
+
+            }
    
-            playerLife.ActualLife -= damage;
         }
     }
 }
