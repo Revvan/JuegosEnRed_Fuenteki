@@ -20,8 +20,10 @@ public class CustomTransformSync : MonoBehaviourPun, IPunObservable
     {
         if (!photonView.IsMine)
         {
-            transform.position = Vector3.Lerp(transform.position, networkPos, Time.deltaTime);
-            transform.rotation = Quaternion.Lerp(transform.rotation, networkRot, Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, networkPos, Time.deltaTime * 10);
+            transform.rotation = Quaternion.Lerp(transform.rotation, networkRot, Time.deltaTime * 10);
+            //transform.position = networkPos;
+            //transform.rotation = networkRot;
         }   
     }
 
