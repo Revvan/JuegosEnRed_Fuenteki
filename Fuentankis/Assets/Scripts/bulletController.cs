@@ -41,7 +41,7 @@ public class bulletController : MonoBehaviourPun
     {
         if (lifeStartTime + lifetime <= Time.time)
         {
-             Destroy(this.gameObject);
+            PhotonNetwork.Destroy(this.gameObject);
 
         }
     }
@@ -66,7 +66,7 @@ public class bulletController : MonoBehaviourPun
                 //LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
                 //playerLife.DealDamage(damage);
                 //playerLife.printShit("i touched you");
-                Destroy(this.gameObject);
+                PhotonNetwork.Destroy(this.gameObject);
 
             }
    

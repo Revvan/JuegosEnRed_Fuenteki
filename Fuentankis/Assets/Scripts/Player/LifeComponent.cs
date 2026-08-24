@@ -10,7 +10,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     
     private float NetActualLife;
     private float NetMaxLife;
-    private bool netAlive;
+    private bool netAlive = true;
 
     private PhotonView myView;
 
@@ -23,6 +23,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         if (photonView.IsMine)
         {
             ActualLife = MaxLife;
+            netAlive = alive;
         }
 
     }
