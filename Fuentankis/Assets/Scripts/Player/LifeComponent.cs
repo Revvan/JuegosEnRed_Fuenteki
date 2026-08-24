@@ -66,7 +66,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         Debug.Log(shitiString);
     }
 
-
+    [PunRPC]
     public void RPC_DealDamage(float damage)
     {
         ActualLife -= damage;
