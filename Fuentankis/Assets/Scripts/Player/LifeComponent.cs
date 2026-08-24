@@ -10,6 +10,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     
     private float NetActualLife;
     private float NetMaxLife;
+    private bool netAlive;
 
     private PhotonView myView;
 
@@ -28,6 +29,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     void Update()
     {
+        text.text = "Player " + myView.Owner + ": " + ActualLife;
         if (!alive)
         {
             return;
@@ -36,6 +38,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         {
             ActualLife = NetActualLife;
             MaxLife = NetMaxLife;
+            alive = netAlive;
         }
         else
         {
@@ -45,7 +48,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
                 alive = false;
             }
         }
-        text.text = "Player " + myView.Owner + ": " + ActualLife;
+        
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -54,11 +57,13 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         {
             stream.SendNext(ActualLife);
             stream.SendNext(MaxLife);
+            stream.SendNext(alive);
         }
         else
         {
             NetActualLife = (float)stream.ReceiveNext();
             NetMaxLife = (float)stream.ReceiveNext();
+            netAlive = (bool)stream.ReceiveNext();
         }
     }
 
