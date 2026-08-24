@@ -1,10 +1,12 @@
 using UnityEngine;
 using Photon.Pun;
+using TMPro;
 
 public class LifeComponent : MonoBehaviourPun, IPunObservable
 {
     public float ActualLife=0;
     public float MaxLife=100;
+    [SerializeField] private TextMeshProUGUI text;
     
     private float NetActualLife;
     private float NetMaxLife;
@@ -39,10 +41,11 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         {
             if (ActualLife <= 0)
             {
-                Debug.Log("I Died");
+                Debug.Log("I Died " + myView.Owner);
                 alive = false;
             }
         }
+        text.text = "Player " + myView.Owner + ": " + ActualLife;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -64,7 +67,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     }
 
 
-    public void DealDamage(float damage)
+    public void RPC_DealDamage(float damage)
     {
         ActualLife -= damage;
         NetActualLife -= damage;

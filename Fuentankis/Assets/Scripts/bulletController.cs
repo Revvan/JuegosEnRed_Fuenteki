@@ -56,15 +56,21 @@ public class bulletController : MonoBehaviourPun
         {
             Debug.Log("Player");
 
-            if (collision.gameObject.GetComponent<PhotonView>().Owner != myView.Owner)
+            PhotonView otherPV = collision.gameObject.GetComponent<PhotonView>();
+
+            if (otherPV.Owner != myView.Owner)
             {
+                otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
+
                 Debug.Log("not mine");
-                LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
-                playerLife.DealDamage(damage);
-                playerLife.printShit("i toched you");
+                //LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
+                //playerLife.DealDamage(damage);
+                //playerLife.printShit("i touched you");
+                Destroy(this.gameObject);
 
             }
    
         }
+
     }
 }
