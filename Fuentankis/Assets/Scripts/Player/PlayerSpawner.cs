@@ -24,7 +24,7 @@ public class PlayerSpawner : MonoBehaviourPun
     private void SpawnPlayer()
     {
         playerCount = PhotonNetwork.CurrentRoom.PlayerCount % spawnPoint.Count;
-        Debug.Log("SpawnPlayer: "+ playerCount + " pos: " + spawnPoint[playerCount].name);
+        //Debug.Log("SpawnPlayer: "+ playerCount + " pos: " + spawnPoint[playerCount].name);
         PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint[playerCount].position, Quaternion.identity);
 
     }

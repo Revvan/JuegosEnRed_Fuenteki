@@ -31,7 +31,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined to Lobby");
-        PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room esteban");
+        PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room");
     }
 
     public override void OnJoinedRoom()
