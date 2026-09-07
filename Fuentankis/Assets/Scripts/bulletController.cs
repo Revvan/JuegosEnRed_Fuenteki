@@ -7,8 +7,8 @@ public class bulletController : MonoBehaviourPun
     private Rigidbody2D rb;
     private PhotonView myView;
 
-
     [SerializeField] float damage = 100.0f;
+    [SerializeField] float BulletForce = 10;
 
     [SerializeField] float lifetime = 5.0f;
     private float lifeStartTime = 0;
@@ -24,7 +24,6 @@ public class bulletController : MonoBehaviourPun
     {
         if (!myView.IsMine)
         { return; }
-        rb.AddForce(Vector2.up * 100);
     }
 
     // Update is called once per frame
@@ -44,6 +43,11 @@ public class bulletController : MonoBehaviourPun
             PhotonNetwork.Destroy(this.gameObject);
 
         }
+    }
+
+    public void BulletImpulse(Transform trns)
+    {
+        rb.AddForce(trns.up * BulletForce, ForceMode2D.Impulse);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
