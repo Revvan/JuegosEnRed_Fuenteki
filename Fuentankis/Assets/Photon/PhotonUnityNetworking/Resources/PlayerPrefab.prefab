@@ -115,7 +115,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &3984587281414174355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,7 +433,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6809907661698028246, guid: fe6c03acc768af74aaf9f3f5f0105e26, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
