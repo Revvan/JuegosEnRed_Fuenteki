@@ -41,7 +41,8 @@ public class PlayerWeapon : MonoBehaviourPun
 
                 if (lastFireTime + fireRate <= Time.time)
                 {
-                    bulletController bullet = PhotonNetwork.Instantiate(bulletPrefab.name, cannonTip.position, Quaternion.identity).GetComponent<bulletController>();
+                    bulletController bullet = PhotonNetwork.Instantiate(bulletPrefab.name, cannonTip.position, cannonTip.rotation).GetComponent<bulletController>();
+                    bullet.BulletImpulse(cannonTip);
                     if (bullet != null)
                     {
                         count++;
@@ -64,7 +65,7 @@ public class PlayerWeapon : MonoBehaviourPun
         Vector3 mouse = new Vector3(posX, posY, 0f);
 
         Vector3 displacement = trns.position - Camera.main.ScreenToWorldPoint(mouse);
-
+        
         float angle = Mathf.Atan2 (displacement.y, displacement.x) * Mathf.Rad2Deg;
 
         trns.rotation = Quaternion.Euler(0f, 0f, angle + offst);
