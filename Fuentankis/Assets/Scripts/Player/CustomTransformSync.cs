@@ -5,7 +5,7 @@ using Unity.Mathematics;
 public class CustomTransformSync : MonoBehaviourPun, IPunObservable
 {
     Vector3 networkPos;
-    Quaternion networkRot;
+    //Quaternion networkRot;
 
 
 
@@ -21,7 +21,7 @@ public class CustomTransformSync : MonoBehaviourPun, IPunObservable
         if (!photonView.IsMine)
         {
             transform.position = Vector3.Lerp(transform.position, networkPos, Time.deltaTime * 10);
-            transform.rotation = Quaternion.Lerp(transform.rotation, networkRot, Time.deltaTime * 10);
+            //transform.rotation = Quaternion.Lerp(transform.rotation, networkRot, Time.deltaTime * 10);
             //transform.position = networkPos;
             //transform.rotation = networkRot;
         }   
@@ -33,12 +33,12 @@ public class CustomTransformSync : MonoBehaviourPun, IPunObservable
         if (stream.IsWriting)
         {
             stream.SendNext(transform.position);
-            stream.SendNext(transform.rotation);
+            //stream.SendNext(transform.rotation);
         }
         else
         {
             networkPos = (Vector3)stream.ReceiveNext();
-            networkRot = (Quaternion)stream.ReceiveNext();
+            //networkRot = (Quaternion)stream.ReceiveNext();
         }
     }
 }

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8545100976584168223}
   - component: {fileID: 3984587281414174355}
   - component: {fileID: 6646561818095320938}
+  - component: {fileID: 6979321867002854784}
   - component: {fileID: 1308520021711052276}
   m_Layer: 0
   m_Name: PlayerPrefab
@@ -61,6 +62,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 8042859319606000874}
   - {fileID: 6646561818095320938}
+  - {fileID: 6979321867002854784}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -129,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   bulletPrefab: {fileID: 6596474327333792238, guid: 53d93bf4cf36d5d41abc96c11e6a551e, type: 3}
-  Player: {fileID: 7461165218927755684}
+  playerSprite: {fileID: 7461165218927755684}
   cannonTip: {fileID: 6453002522387065897}
   aimOffset: 90
   count: 0
@@ -150,6 +152,19 @@ MonoBehaviour:
   MaxLife: 100
   text: {fileID: 2264140410927067019}
   alive: 1
+--- !u!114 &6979321867002854784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064804346352474027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73a1bb3722933c42a340b02449dd342, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteSync
+  Sprite: {fileID: 7461165218927755684}
 --- !u!58 &1308520021711052276
 CircleCollider2D:
   m_ObjectHideFlags: 0
