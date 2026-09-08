@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 public class PlayerWeapon : MonoBehaviourPun
 {
     [SerializeField] GameObject bulletPrefab;
-    [SerializeField] Transform Player;
+    [SerializeField] Transform playerSprite;
     [SerializeField] Transform cannonTip;
     [SerializeField] float aimOffset;
 
@@ -31,7 +31,7 @@ public class PlayerWeapon : MonoBehaviourPun
         { return; }
 
         ProcessShoot();
-        CannonRotation(Player, aimOffset);
+        CannonRotation(playerSprite, aimOffset);
     }
 
     void ProcessShoot()
@@ -70,4 +70,10 @@ public class PlayerWeapon : MonoBehaviourPun
 
         trns.rotation = Quaternion.Euler(0f, 0f, angle + offst);
     }
+
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.green;
+    //    Gizmos.DrawSphere(cannonTip.position, 0.2f);
+    //}
 }
