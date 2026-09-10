@@ -3,6 +3,8 @@ using Photon.Pun;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
+    public PhotonRoomSearcher RoomSearcher;
+
     public delegate void OnRoomCallback();
     public OnRoomCallback OnRoom;
 
@@ -12,7 +14,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (Instance != null)
         {
+            if (RoomSearcher != null)
+            {
+                Instance.RoomSearcher = RoomSearcher;
+                //Steal room searcher reference from newer instance
+            }
             Destroy(this.gameObject);
+
             return;
         }
         Instance = this;
@@ -31,7 +39,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined to Lobby");
-        PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room");
+        if (Instance.RoomSearcher == null)
+        {
+            PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room");
+        }
+        else { 
+            RoomSearcher.FetchRooms();
+        }
+    }
+
+    public void JoinRoom(string roomName)
+    {
+        PhotonNetwork.JoinRoom(roomName);
     }
 
     public override void OnJoinedRoom()
