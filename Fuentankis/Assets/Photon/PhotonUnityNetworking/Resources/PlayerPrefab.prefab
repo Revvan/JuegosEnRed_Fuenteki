@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3984587281414174355}
   - component: {fileID: 6646561818095320938}
   - component: {fileID: 6979321867002854784}
+  - component: {fileID: 5713522435552851174}
   - component: {fileID: 1308520021711052276}
   m_Layer: 0
   m_Name: PlayerPrefab
@@ -135,7 +136,7 @@ MonoBehaviour:
   cannonTip: {fileID: 6453002522387065897}
   aimOffset: 90
   count: 0
-  fireRate: 0.5
+  fireRate: 0.4
 --- !u!114 &6646561818095320938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -165,6 +166,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteSync
   Sprite: {fileID: 7461165218927755684}
+--- !u!114 &5713522435552851174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064804346352474027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08adf8ff4cf7be6468d313d57a420eab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCamera
+  myCamera: {fileID: 0}
+  camOffset: {x: 0.1, y: 0.1}
+  smoothSpeed: 3
 --- !u!58 &1308520021711052276
 CircleCollider2D:
   m_ObjectHideFlags: 0

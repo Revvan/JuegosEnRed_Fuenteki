@@ -10,6 +10,7 @@ public class PlayerWeapon : MonoBehaviourPun
     [SerializeField] float aimOffset;
 
     private PhotonView myView;
+    private PlayerCamera pC;
 
     public int count = 0;
 
@@ -19,6 +20,7 @@ public class PlayerWeapon : MonoBehaviourPun
     void Awake()
     {
         myView = GetComponent<PhotonView>();
+        pC = GetComponent<PlayerCamera>();
         if (bulletPrefab == null) {
             Debug.LogError("no bullet prefab bro...");
         }
@@ -64,7 +66,7 @@ public class PlayerWeapon : MonoBehaviourPun
 
         Vector3 mouse = new Vector3(posX, posY, 0f);
 
-        Vector3 displacement = trns.position - Camera.main.ScreenToWorldPoint(mouse);
+        Vector3 displacement = trns.position - pC.myCamera.ScreenToWorldPoint(mouse);
         
         float angle = Mathf.Atan2 (displacement.y, displacement.x) * Mathf.Rad2Deg;
 
