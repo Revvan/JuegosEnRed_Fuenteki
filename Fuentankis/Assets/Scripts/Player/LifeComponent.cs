@@ -1,13 +1,23 @@
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
+using Unity.VisualScripting;
+using System.Collections;
 
 public class LifeComponent : MonoBehaviourPun, IPunObservable
 {
     public float ActualLife=0;
     public float MaxLife=100;
     [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private float respawnTime = 3f;
+
+    private SpriteRenderer sprite;
+    private Collider2D collision;
+    private PlayerMovement pMove;
+    private PlayerWeapon pWeap;
     
+    private PlayerSpawner spawner;
+
     private float NetActualLife;
     private float NetMaxLife;
     private bool netAlive = true;
@@ -20,36 +30,79 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     void Awake()
     {
         myView = GetComponent<PhotonView>();
+        sprite = GetComponentInChildren<SpriteRenderer>();
+        collision = GetComponent<Collider2D>();
+        pMove = GetComponent<PlayerMovement>();
+        pWeap = GetComponent<PlayerWeapon>();
+        spawner = PlayerSpawner.Instance;
+
         if (photonView.IsMine)
         {
             ActualLife = MaxLife;
             netAlive = alive;
         }
-
     }
 
     void Update()
     {
-        text.text = "Player " + myView.Owner + ": " + ActualLife;
-        if (!alive)
+        if (photonView.IsMine)
         {
-            return;
+            if (ActualLife <= 0)
+            {
+                Debug.Log("I Died " + myView.Owner);
+                Die();
+            }           
         }
-        if (!photonView.IsMine)
+        else
         {
             ActualLife = NetActualLife;
             MaxLife = NetMaxLife;
             alive = netAlive;
         }
-        else
+
+        text.text = "Player " + myView.Owner + ": " + ActualLife;
+        VisualState(alive);
+    }
+
+    private void VisualState(bool alv)
+    {
+        if(sprite != null) 
         {
-            if (ActualLife <= 0)
-            {
-                Debug.Log("I Died " + myView.Owner);
-                alive = false;
-            }
+            sprite.enabled = alv;
         }
-        
+
+        if (collision != null)
+        {
+            collision.enabled = alv;
+        }
+
+        if (pMove != null)
+        {
+            pMove.enabled = alv && myView.IsMine;
+        }
+
+        if (pWeap != null)
+        {
+            pWeap.enabled = alv && myView.IsMine;
+        }
+    }
+
+    private void Die()
+    {
+        alive = false;
+        photonView.RPC("RPC_Death", RpcTarget.All);
+        StartCoroutine(RespawnRoutine());
+    }
+
+    private IEnumerator RespawnRoutine()
+    {
+        yield return new WaitForSeconds(respawnTime);
+
+        Transform spPoint = spawner.RandomSpawnPoint();
+        ActualLife = MaxLife;
+        alive = true;
+
+        myView.RPC("RPC_Respawn", RpcTarget.All, spPoint.position);       
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -77,9 +130,27 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     {
         ActualLife -= damage;
         NetActualLife -= damage;
-
     }
 
+    [PunRPC]
+    public void RPC_Death()
+    {
+        alive = false;
+        netAlive = false;
+    }
+
+    [PunRPC]
+
+    public void RPC_Respawn(Vector3 pos)
+    {
+        transform.position = pos;
+        alive = true;
+        netAlive = true;
+        if(myView.IsMine)
+        {
+            ActualLife = MaxLife;
+        }
+    }
 }
 
 
