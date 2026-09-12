@@ -24,6 +24,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     private PhotonView myView;
 
+    private bool isInvulnerable = false;
+
     public bool alive=true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -47,7 +49,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     {
         if (photonView.IsMine)
         {
-            if (ActualLife <= 0)
+            if (alive && ActualLife <= 0)
             {
                 Debug.Log("I Died " + myView.Owner);
                 Die();
@@ -89,6 +91,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     private void Die()
     {
+        if(!alive) { return; }
         alive = false;
         photonView.RPC("RPC_Death", RpcTarget.All);
         StartCoroutine(RespawnRoutine());
@@ -101,8 +104,12 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         Transform spPoint = spawner.RandomSpawnPoint();
         ActualLife = MaxLife;
         alive = true;
+        isInvulnerable = true;
 
-        myView.RPC("RPC_Respawn", RpcTarget.All, spPoint.position);       
+        myView.RPC("RPC_Respawn", RpcTarget.All, spPoint.position);
+        
+        yield return new WaitForSeconds(5f);
+        isInvulnerable = false;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -128,8 +135,16 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     [PunRPC]
     public void RPC_DealDamage(float damage)
     {
-        ActualLife -= damage;
-        NetActualLife -= damage;
+        if (!myView.IsMine)
+        {
+            return;
+        }
+
+        if(isInvulnerable || !alive)
+        {
+            return;
+        }
+        ActualLife -= damage;    
     }
 
     [PunRPC]
