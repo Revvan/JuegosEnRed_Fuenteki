@@ -470,8 +470,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 893719726}
-  - component: {fileID: 893719725}
   - component: {fileID: 893719727}
+  - component: {fileID: 893719725}
   m_Layer: 0
   m_Name: PlayerSpawner
   m_TagString: Untagged
@@ -850,6 +850,77 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5170357337435781173, guid: 8ddd1ac52209db84bacfaa7a6c3e770a, type: 3}
   m_PrefabInstance: {fileID: 1652292729}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1658262428
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1658262429}
+  - component: {fileID: 1658262431}
+  - component: {fileID: 1658262430}
+  m_Layer: 0
+  m_Name: BulletSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1658262429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658262428}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1658262430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658262428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a87dbff5811f9c489e0066a6d19b90b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BulletSpawn
+  ammo_prefab: {fileID: 6311065262216992779, guid: 541f5d8c759a0624799f294f6043b5c4, type: 3}
+  spawn_container: {fileID: 1658262428}
+  spawn_position: {x: 1, y: 1}
+  spawnTime: 5
+--- !u!114 &1658262431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658262428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonView
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 6
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1748769205
 GameObject:
   m_ObjectHideFlags: 0
@@ -1015,6 +1086,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf1788fe20d49f24a89f8675e9048d6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  RoomSearcher: {fileID: 0}
 --- !u!4 &2020057768
 Transform:
   m_ObjectHideFlags: 0
@@ -1140,3 +1212,4 @@ SceneRoots:
   - {fileID: 699237400}
   - {fileID: 893719726}
   - {fileID: 1748769206}
+  - {fileID: 1658262429}

@@ -1,8 +1,8 @@
-using UnityEngine;
 using Photon.Pun;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerWeapon : MonoBehaviourPun
+public class PlayerWeapon : MonoBehaviourPun, IPunObservable
 {
     [SerializeField] GameObject bulletPrefab;
     [SerializeField] Transform playerSprite;
@@ -13,6 +13,10 @@ public class PlayerWeapon : MonoBehaviourPun
     private PlayerCamera pC;
 
     public int count = 0;
+
+
+    public int ammoCount = 0;
+    private int netAmmoCount = 0;
 
     [SerializeField] float fireRate = 0.5f;
     private float lastFireTime = 0;
@@ -29,31 +33,45 @@ public class PlayerWeapon : MonoBehaviourPun
     // Update is called once per frame
     void Update()
     {
-        if (!myView.IsMine)
-        { return; }
-
-        ProcessShoot();
-        CannonRotation(playerSprite, aimOffset);
+        if (!photonView.IsMine)
+        {
+            ammoCount = netAmmoCount;
+        }
+        else
+        {
+            ProcessShoot();
+            CannonRotation(playerSprite, aimOffset);
+        }
     }
 
     void ProcessShoot()
     {
         if (Keyboard.current != null) {
-            if (Keyboard.current.spaceKey.isPressed) {
-
-                if (lastFireTime + fireRate <= Time.time)
+            if (Keyboard.current.spaceKey.isPressed) 
+            {
+                if (HasAmmo())
                 {
-                    bulletController bullet = PhotonNetwork.Instantiate(bulletPrefab.name, cannonTip.position, cannonTip.rotation).GetComponent<bulletController>();
-                    bullet.BulletImpulse(cannonTip);
-                    if (bullet != null)
+                    if (lastFireTime + fireRate <= Time.time)
                     {
-                        count++;
+                        bulletController bullet = PhotonNetwork.Instantiate(bulletPrefab.name, cannonTip.position, cannonTip.rotation).GetComponent<bulletController>();
+                        bullet.BulletImpulse(cannonTip);
+                        if (bullet != null)
+                        {
+                            count++;
+                        }
+                        else
+                        {
+                            Debug.Log("Missing bullet instantiation");
+                        }
+
+                        myView.RPC("RemoveAmmo", RpcTarget.All, 1);
+
+                        lastFireTime = Time.time;
                     }
-                    else
-                    {
-                        Debug.Log("Missing bullet instantiation");
-                    }
-                    lastFireTime = Time.time;
+                }
+                else
+                {
+                    Debug.Log("No ammo left");
                 }
             }
         }
@@ -78,4 +96,37 @@ public class PlayerWeapon : MonoBehaviourPun
     //    Gizmos.color = Color.green;
     //    Gizmos.DrawSphere(cannonTip.position, 0.2f);
     //}
+
+
+    public bool HasAmmo()
+    {
+        return ammoCount > 0;
+    }
+
+    [PunRPC]
+    public void AddAmmo(int amount)
+    {    
+        ammoCount += amount;
+        netAmmoCount += amount;
+        //print("Here in add ammo");
+    }
+
+    [PunRPC]
+    public void RemoveAmmo(int amount)
+    {
+        ammoCount -= amount;
+        netAmmoCount -= amount;
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(ammoCount);
+        }
+        else
+        {
+            netAmmoCount = (int)stream.ReceiveNext();
+        }
+    }
 }

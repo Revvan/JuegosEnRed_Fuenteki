@@ -21,7 +21,7 @@ public class PlayerSpawner : MonoBehaviourPun
     {
         PhotonManager.Instance.OnRoom += PlayerJoinedRoom;
         if(spawnPoint.Count <=0){
-            Debug.Log("no spawn point");
+            //Debug.Log("no spawn point");
         }
     }
 

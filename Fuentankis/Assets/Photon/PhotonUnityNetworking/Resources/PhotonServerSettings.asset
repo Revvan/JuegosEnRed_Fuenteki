@@ -42,6 +42,9 @@ MonoBehaviour:
   - RPC_DealDamage
   - RPC_Death
   - RPC_Respawn
+  - AddAmmo
+  - DestroyAmmo
+  - RemoveAmmo
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

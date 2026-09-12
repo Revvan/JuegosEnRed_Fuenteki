@@ -26,13 +26,13 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
 
         for (int i = 0; i < obstaclesAmount; i++)
         {
-            Debug.Log("mix x luncanon");
+            //Debug.Log("mix x luncanon");
             int x = (int)(Random.value * (worldSpace.x));
             int y = (int)(Random.value * (worldSpace.y));
 
             GameObject go = PhotonNetwork.Instantiate(wallPrefab.name, new Vector3(x + origin.x, y + origin.y, worldSpace.z), Quaternion.identity);
             go.transform.localScale *= Random.value + 1;
-            Debug.Log(go.transform.localScale);
+            //Debug.Log(go.transform.localScale);
             go.transform.SetParent(gameObject.transform);
         }
 
