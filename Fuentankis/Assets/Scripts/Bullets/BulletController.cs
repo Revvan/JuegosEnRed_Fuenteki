@@ -2,16 +2,11 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.Rendering;
 
-public class bulletController : MonoBehaviourPun
+public class BulletController : BulletBase
 {
-    private Rigidbody2D rb;
-    private PhotonView myView;
-
-    [SerializeField] float damage = 100.0f;
-    [SerializeField] float BulletForce = 10;
-
     [SerializeField] float lifetime = 5.0f;
     private float lifeStartTime = 0;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
@@ -45,18 +40,11 @@ public class bulletController : MonoBehaviourPun
         }
     }
 
-    public void BulletImpulse(Transform trns)
-    {
-        rb.AddForce(trns.up * BulletForce, ForceMode2D.Impulse);
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
-
-
         Debug.Log("trigger");
 
-        if (collision.gameObject.CompareTag("Player") )
+        if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Player");
 
@@ -73,7 +61,7 @@ public class bulletController : MonoBehaviourPun
                 PhotonNetwork.Destroy(this.gameObject);
 
             }
-   
+
         }
 
     }

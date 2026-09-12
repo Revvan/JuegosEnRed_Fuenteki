@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public class PlayerWeapon : MonoBehaviourPun
 {
@@ -8,13 +9,16 @@ public class PlayerWeapon : MonoBehaviourPun
     [SerializeField] Transform playerSprite;
     [SerializeField] Transform cannonTip;
     [SerializeField] float aimOffset;
+    [SerializeField] Key keyToShoot;
 
     private PhotonView myView;
     private PlayerCamera pC;
 
     public int count = 0;
+    public int ammo = 0;
 
     [SerializeField] float fireRate = 0.5f;
+    [SerializeField] float shootingForce = 10f;
     private float lastFireTime = 0;
 
     void Awake()
@@ -38,16 +42,18 @@ public class PlayerWeapon : MonoBehaviourPun
 
     void ProcessShoot()
     {
-        if (Keyboard.current != null) {
-            if (Keyboard.current.spaceKey.isPressed) {
+        if (Keyboard.current != null && ammo > 0) {
+            //Keyboard.current.spaceKey.isPressed
+            if (Keyboard.current[keyToShoot].isPressed) {
 
                 if (lastFireTime + fireRate <= Time.time)
                 {
-                    bulletController bullet = PhotonNetwork.Instantiate(bulletPrefab.name, cannonTip.position, cannonTip.rotation).GetComponent<bulletController>();
-                    bullet.BulletImpulse(cannonTip);
+                    BulletBase bullet = PhotonNetwork.Instantiate(bulletPrefab.name, cannonTip.position, cannonTip.rotation).GetComponent<BulletBase>();
+                    bullet.BulletImpulse(cannonTip, shootingForce);
                     if (bullet != null)
                     {
                         count++;
+                        ammo--;
                     }
                     else
                     {
@@ -57,6 +63,11 @@ public class PlayerWeapon : MonoBehaviourPun
                 }
             }
         }
+    }
+
+    public void ObtainAmmo(int amount)
+    {
+        ammo += amount;
     }
 
     private void CannonRotation(Transform trns, float offst)
@@ -72,6 +83,8 @@ public class PlayerWeapon : MonoBehaviourPun
 
         trns.rotation = Quaternion.Euler(0f, 0f, angle + offst);
     }
+
+
 
     //private void OnDrawGizmos()
     //{

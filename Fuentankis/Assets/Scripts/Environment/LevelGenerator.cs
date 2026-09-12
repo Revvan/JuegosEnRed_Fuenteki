@@ -26,7 +26,6 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
 
         for (int i = 0; i < obstaclesAmount; i++)
         {
-            Debug.Log("mix x luncanon");
             int x = (int)(Random.value * (worldSpace.x));
             int y = (int)(Random.value * (worldSpace.y));
 

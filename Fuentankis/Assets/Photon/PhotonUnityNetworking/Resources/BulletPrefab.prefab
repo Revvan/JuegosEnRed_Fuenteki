@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6349083051051201411}
   - component: {fileID: 4353433359475994348}
   - component: {fileID: 7017882592562960891}
-  - component: {fileID: 5855568523114181130}
+  - component: {fileID: 5837400913085736604}
   - component: {fileID: 1488237280302538349}
   - component: {fileID: 1853015221336867717}
   m_Layer: 0
@@ -72,7 +72,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b67920849105f24698e772bfb7fb4a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomTransformSync
---- !u!114 &5855568523114181130
+--- !u!114 &5837400913085736604
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -83,8 +83,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83f7e19eb876a3d4ba352fa284c9ce90, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
+  m_EditorClassIdentifier: Assembly-CSharp::BulletController
   damage: 100
+  BulletForce: 10
   lifetime: 5
 --- !u!50 &1488237280302538349
 Rigidbody2D:
