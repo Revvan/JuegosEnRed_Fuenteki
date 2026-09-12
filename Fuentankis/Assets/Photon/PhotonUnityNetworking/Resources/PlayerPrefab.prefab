@@ -152,6 +152,8 @@ MonoBehaviour:
   ActualLife: 0
   MaxLife: 100
   text: {fileID: 2264140410927067019}
+  respawnTime: 3
+  sprite: {fileID: 1064804346352474027}
   alive: 1
 --- !u!114 &6979321867002854784
 MonoBehaviour:
