@@ -1,6 +1,5 @@
 using UnityEngine;
 using Photon.Pun;
-using UnityEngine.Rendering;
 
 public class BulletController : BulletBase
 {
@@ -24,11 +23,11 @@ public class BulletController : BulletBase
     // Update is called once per frame
     void Update()
     {
-        KillBulletCheck();
-
         if (!myView.IsMine)
-        { return; }
-
+        { 
+            return; 
+        }
+        KillBulletCheck();
     }
 
     void KillBulletCheck()
@@ -36,17 +35,16 @@ public class BulletController : BulletBase
         if (lifeStartTime + lifetime <= Time.time)
         {
             PhotonNetwork.Destroy(this.gameObject);
-
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("trigger");
+        //Debug.Log("trigger");
 
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Player");
+            //Debug.Log("Player");
 
             PhotonView otherPV = collision.gameObject.GetComponent<PhotonView>();
 
@@ -54,15 +52,12 @@ public class BulletController : BulletBase
             {
                 otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
 
-                Debug.Log("not mine");
+                //Debug.Log("not mine");
                 //LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
                 //playerLife.DealDamage(damage);
                 //playerLife.printShit("i touched you");
                 PhotonNetwork.Destroy(this.gameObject);
-
             }
-
         }
-
     }
 }

@@ -5,12 +5,23 @@ using System.ComponentModel;
 public class SpriteSync : MonoBehaviourPun, IPunObservable
 {
     [SerializeField] private Transform Sprite;
-
+    private SpriteRenderer spriteRender;
+ 
     Quaternion spriteRot = Quaternion.identity;
 
     private void Awake()
     {
         spriteRot = Sprite.localRotation;
+        spriteRender = GetComponentInChildren<SpriteRenderer>();
+
+        if (photonView.IsMine)
+        {
+            spriteRender.color = Color.deepSkyBlue;
+        }
+        else
+        {
+            spriteRender.color = Color.indianRed;
+        }
     }
 
     private void Update()
@@ -18,7 +29,7 @@ public class SpriteSync : MonoBehaviourPun, IPunObservable
         if (!photonView.IsMine)
         {
             Sprite.localRotation = Quaternion.Lerp(Sprite.localRotation, spriteRot, Time.deltaTime * 10);
-        }        
+        }
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
