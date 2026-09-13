@@ -45,6 +45,12 @@ MonoBehaviour:
   - AddAmmo
   - DestroyAmmo
   - RemoveAmmo
+  - AddGrenade
+  - AddMainAmmo
+  - RemoveGrenade
+  - RemoveMainAmmo
+  - DestroyBullet
+  - Explode
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

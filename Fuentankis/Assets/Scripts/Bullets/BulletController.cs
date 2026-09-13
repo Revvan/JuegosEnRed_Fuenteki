@@ -56,7 +56,7 @@ public class BulletController : BulletBase
                 //LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
                 //playerLife.DealDamage(damage);
                 //playerLife.printShit("i touched you");
-                PhotonNetwork.Destroy(this.gameObject);
+                PhotonNetwork.Destroy(gameObject);
             }
         }
     }

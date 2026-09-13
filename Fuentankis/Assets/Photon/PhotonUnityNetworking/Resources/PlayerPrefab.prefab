@@ -13,12 +13,13 @@ GameObject:
   - component: {fileID: 4916479112155302420}
   - component: {fileID: 8042859319606000874}
   - component: {fileID: 8545100976584168223}
-  - component: {fileID: 3984587281414174355}
-  - component: {fileID: 9173322234799493383}
+  - component: {fileID: 2874274901707056948}
   - component: {fileID: 6646561818095320938}
   - component: {fileID: 6979321867002854784}
   - component: {fileID: 5713522435552851174}
   - component: {fileID: 1308520021711052276}
+  - component: {fileID: 5059262803284414996}
+  - component: {fileID: 2176983067359027331}
   m_Layer: 3
   m_Name: PlayerPrefab
   m_TagString: Player
@@ -65,6 +66,8 @@ MonoBehaviour:
   - {fileID: 8042859319606000874}
   - {fileID: 6646561818095320938}
   - {fileID: 6979321867002854784}
+  - {fileID: 5059262803284414996}
+  - {fileID: 2176983067359027331}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -120,7 +123,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &3984587281414174355
+--- !u!114 &2874274901707056948
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,39 +132,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1064804346352474027}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 219ce6c86f6c51e449d4a3112c5de064, type: 3}
+  m_Script: {fileID: 11500000, guid: 32375217e924c5244a3c682abe213d61, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
-  bulletPrefab: {fileID: 6596474327333792238, guid: 53d93bf4cf36d5d41abc96c11e6a551e, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerWeaponsController
+  mainWeapon: {fileID: 5059262803284414996}
+  grenadeLauncher: {fileID: 2176983067359027331}
   playerSprite: {fileID: 7461165218927755684}
-  cannonTip: {fileID: 6453002522387065897}
   aimOffset: 90
-  keyToShoot: 1
-  count: 0
-  ammo: 20
-  fireRate: 0.4
-  shootingForce: 10
---- !u!114 &9173322234799493383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1064804346352474027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 219ce6c86f6c51e449d4a3112c5de064, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
-  bulletPrefab: {fileID: 3445467858564971594, guid: 73b23924e9fa2e74b8c599d301b40fd9, type: 3}
-  playerSprite: {fileID: 7461165218927755684}
-  cannonTip: {fileID: 6453002522387065897}
-  aimOffset: 90
-  keyToShoot: 19
-  count: 0
-  ammo: 5
-  fireRate: 1
-  shootingForce: 8
 --- !u!114 &6646561818095320938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,7 +155,6 @@ MonoBehaviour:
   MaxLife: 100
   text: {fileID: 2264140410927067019}
   respawnTime: 3
-  sprite: {fileID: 1064804346352474027}
   alive: 1
 --- !u!114 &6979321867002854784
 MonoBehaviour:
@@ -244,6 +220,46 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &5059262803284414996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064804346352474027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 219ce6c86f6c51e449d4a3112c5de064, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
+  bulletPrefab: {fileID: 6596474327333792238, guid: 53d93bf4cf36d5d41abc96c11e6a551e, type: 3}
+  cannonTip: {fileID: 6453002522387065897}
+  keyToShoot: 1
+  removeAmmoRPC: RemoveMainAmmo
+  count: 0
+  ammoCount: 0
+  fireRate: 0.5
+  shootingForce: 10
+--- !u!114 &2176983067359027331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064804346352474027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4049e7a38adc7f42aa6b0f4c0cde795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrenadeLauncher
+  bulletPrefab: {fileID: 3445467858564971594, guid: 73b23924e9fa2e74b8c599d301b40fd9, type: 3}
+  cannonTip: {fileID: 6453002522387065897}
+  keyToShoot: 19
+  removeAmmoRPC: RemoveGrenade
+  count: 0
+  ammoCount: 5
+  fireRate: 1
+  shootingForce: 8
 --- !u!1 &4275233058376144432
 GameObject:
   m_ObjectHideFlags: 0

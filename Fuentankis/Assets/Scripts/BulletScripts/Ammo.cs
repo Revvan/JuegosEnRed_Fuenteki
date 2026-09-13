@@ -16,8 +16,8 @@ public class Ammo : MonoBehaviourPunCallbacks
             return;
 
         PhotonView playerView = playerWeapon.GetComponent<PhotonView>();
-
-        playerView.RPC(nameof(PlayerWeapon.AddAmmo), RpcTarget.All, 1);
+        
+        playerView.RPC(nameof(PlayerWeapon.AddMainAmmo), RpcTarget.All, 1);
 
         myView.RPC(nameof(DestroyAmmo), RpcTarget.MasterClient);
     }
