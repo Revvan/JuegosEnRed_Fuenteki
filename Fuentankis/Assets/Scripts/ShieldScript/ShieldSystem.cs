@@ -99,7 +99,8 @@ public class ShieldSystem : MonoBehaviourPun, IPunObservable
             
         isShieldActive = true;
         shieldMask = 0;
-
+        text.text = "Active";
+        bar.fillAmount = 1f;
         RebuildShield(myWeapon.ammoCount);
     }
 
@@ -117,7 +118,8 @@ public class ShieldSystem : MonoBehaviourPun, IPunObservable
     public void HideShield()
     {
         isShieldActive = false;
-
+        text.text = "Inactive";
+        bar.fillAmount = 0f;
         ClearShield();
     }
 
