@@ -544,11 +544,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b39d11741bbe4f42979d4d95bb7b5db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerImpulse
-  chargeDuration: 0.5
+  chargeDuration: 0.3
   impulseForce: 15
-  impulseDuration: 0.2
+  impulseDuration: 0.4
   shieldSystem: {fileID: 1395833075312273038}
-  keyToCharge: 31
+  keyToCharge: 51
   playerMovement: {fileID: 4916479112155302420}
   playerChar: {fileID: 8699812920381179265}
 --- !u!1 &1280001431280748917
