@@ -47,7 +47,10 @@ public class BulletController : BulletBase
 
             if (otherPV.Owner != myView.Owner)
             {
-                otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
+                // Cluster bullets keep the grenade cause through their instantiation data.
+                int cause = myView.InstantiationData is { Length: > 0 }
+                    && myView.InstantiationData[0] is int value ? value : 0;
+                otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage, cause);
 
                 PhotonNetwork.Destroy(gameObject);
             }
