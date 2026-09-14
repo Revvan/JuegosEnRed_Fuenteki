@@ -22,6 +22,8 @@ public class Weapon : MonoBehaviourPun
     [SerializeField] float shootingForce = 10f;
     private float lastFireTime = 0;
 
+    public Key KeyToShoot => keyToShoot;
+
     void Awake()
     {
         myView = GetComponent<PhotonView>();
@@ -52,7 +54,6 @@ public class Weapon : MonoBehaviourPun
             //Keyboard.current.spaceKey.isPressed
             if (keyToShoot != Key.None && Keyboard.current[keyToShoot].isPressed)
             {
-
                 if (HasAmmo())
                 {
                     if (lastFireTime + fireRate <= Time.time)

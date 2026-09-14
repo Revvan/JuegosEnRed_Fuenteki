@@ -7,7 +7,6 @@ public class AmmoSpawn : MonoBehaviourPunCallbacks
 
     [SerializeField] private GameObject ammo_prefab;
     [SerializeField] private GameObject spawn_container;
-    [SerializeField] private Vector2 spawn_position = new Vector2(1.0f, 1.0f);
 
     [SerializeField] private float spawnTime = 5.0f;
     private float spawnStartTime = 0.0f;

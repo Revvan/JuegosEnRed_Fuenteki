@@ -59,5 +59,16 @@ public class BulletController : BulletBase
                 PhotonNetwork.Destroy(gameObject);
             }
         }
+
+        if (collision.gameObject.CompareTag("Shield"))
+        {
+            ShieldObject shieldObject = collision.gameObject.GetComponent<ShieldObject>();
+
+            if (shieldObject.MyView.Owner != myView.Owner)
+            {
+                shieldObject.ShieldTakeDamage();
+                PhotonNetwork.Destroy(gameObject);
+            }
+        }
     }
 }
