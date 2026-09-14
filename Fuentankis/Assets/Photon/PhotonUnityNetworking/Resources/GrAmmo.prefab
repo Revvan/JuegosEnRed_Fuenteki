@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.7185301, b: 0, a: 1}
+  m_Color: {r: 0.25698647, g: 0.5188679, b: 0.30639803, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -103,11 +103,11 @@ GameObject:
   - component: {fileID: 3136738657300511307}
   - component: {fileID: 4630724432087442161}
   - component: {fileID: 1446455938794601846}
-  - component: {fileID: 5200777648395327962}
-  - component: {fileID: 7760964804082184390}
-  - component: {fileID: 8604281507249819445}
+  - component: {fileID: 763193719815985905}
+  - component: {fileID: 4265010952026464205}
+  - component: {fileID: 4066790841943602518}
   m_Layer: 0
-  m_Name: Ammo
+  m_Name: GrAmmo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -194,7 +194,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 8604281507249819445}
+  - {fileID: 4066790841943602518}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -210,8 +210,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f37bb549da31e07439043745c9295e56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ammo
-  isGrenade: 0
---- !u!61 &5200777648395327962
+  isGrenade: 1
+--- !u!61 &763193719815985905
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -257,7 +257,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.6, y: 0.6}
   m_EdgeRadius: 0
---- !u!50 &7760964804082184390
+--- !u!50 &4265010952026464205
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -284,7 +284,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &8604281507249819445
+--- !u!114 &4066790841943602518
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
