@@ -1966,8 +1966,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BulletSpawn
   ammo_prefab: {fileID: 6311065262216992779, guid: 541f5d8c759a0624799f294f6043b5c4, type: 3}
+  grammo_prefab: {fileID: 6311065262216992779, guid: 160e7c2ad59134a449b3c5a790adda5a, type: 3}
   spawn_container: {fileID: 1658262428}
-  spawnTime: 5
+  worldSpace: {x: 23, y: 23, z: 1}
+  origin: {x: -11.5, y: -11.5, z: 0}
+  grenadeThreshold: 0.2
+  spawnTime: 3
 --- !u!114 &1658262431
 MonoBehaviour:
   m_ObjectHideFlags: 0
