@@ -34,6 +34,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             return;
         }
         Instance = this;
+        PlayerIdentity.PrepareNetworkIdentity();
 
         // Reuse an existing Photon connection when coming from the Main Menu.
         if (PhotonNetwork.IsConnectedAndReady)

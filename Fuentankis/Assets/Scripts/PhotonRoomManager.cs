@@ -13,6 +13,7 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     public const string StartedKey = "room.started";
     public const string PlayingKey = "room.playing";
+    public const string ReturningKey = "room.returning";
     private const byte ChatEvent = 41;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private TMP_Text minimumPlayersText, maximumPlayersText;
@@ -30,6 +31,7 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private readonly Queue<string> messages = new Queue<string>();
     private bool busy, loading, waitingForStart, startRequested, announcedStart;
     private float nextSend, startRetryAt;
+    private static readonly HashSet<GameObject> gameplayObjects = new HashSet<GameObject>();
 
     public bool Busy => busy || loading;
     public bool HasStarted => PhotonNetwork.InRoom &&
@@ -104,9 +106,46 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void EnterGameplay()
     {
         if (loading || busy || !PhotonNetwork.InRoom) return;
+        if (!Application.CanStreamedLevelBeLoaded("MainGame"))
+        { AddMessage("No se encuentra la escena MainGame en el build."); return; }
         loading = true;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable { { PlayingKey, true } });
-        SceneManager.LoadSceneAsync("MainGame");
+        var match = FindFirstObjectByType<GameManager>();
+        bool returning = match != null && match.HasParticipated(PlayerIdentity.LocalId);
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable {
+            { PlayingKey, true }, { ReturningKey, returning }
+        });
+        PhotonNetwork.SendAllOutgoingCommands();
+        // Cached instantiations may already exist in RoomsScene. A normal scene load destroys
+        // them locally, and Photon does not replay that cache a second time in the same join.
+        PhotonNetwork.IsMessageQueueRunning = false;
+        gameplayObjects.Clear();
+        foreach (var view in PhotonNetwork.PhotonViewCollection)
+            if (view != null && view.InstantiationId > 0)
+                gameplayObjects.Add(view.transform.root.gameObject);
+        foreach (var root in gameplayObjects) DontDestroyOnLoad(root);
+        SceneManager.sceneLoaded += GameplayLoaded;
+        try { SceneManager.LoadSceneAsync("MainGame"); }
+        catch (System.Exception exception)
+        {
+            RestoreGameplayObjects(SceneManager.GetActiveScene());
+            loading = false;
+            AddMessage("No se pudo cargar la partida: " + exception.Message);
+        }
+    }
+
+    // Static callback survives the destruction of this RoomsScene component.
+    private static void GameplayLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "MainGame") RestoreGameplayObjects(scene);
+    }
+
+    private static void RestoreGameplayObjects(Scene scene)
+    {
+        SceneManager.sceneLoaded -= GameplayLoaded;
+        foreach (var root in gameplayObjects)
+            if (root != null) SceneManager.MoveGameObjectToScene(root, scene);
+        gameplayObjects.Clear();
+        PhotonNetwork.IsMessageQueueRunning = true;
     }
 
     public void SendChat()
