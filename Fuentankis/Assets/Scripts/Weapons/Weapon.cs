@@ -1,4 +1,5 @@
 using Photon.Pun;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +8,7 @@ public class Weapon : MonoBehaviourPun
     [SerializeField] public GameObject bulletPrefab;
     [SerializeField] Transform cannonTip;
     [SerializeField] Key keyToShoot;
+    [SerializeField] private TextMeshProUGUI text;
 
     [SerializeField] string removeAmmoRPC = "";
     public int count = 0;
@@ -40,6 +42,7 @@ public class Weapon : MonoBehaviourPun
         {
             ProcessShoot();
         }
+        text.text = ammoCount.ToString();
     }
 
     void ProcessShoot()

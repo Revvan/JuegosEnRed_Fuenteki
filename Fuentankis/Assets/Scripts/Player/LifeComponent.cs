@@ -3,12 +3,15 @@ using Photon.Pun;
 using TMPro;
 using Unity.VisualScripting;
 using System.Collections;
+using UnityEngine.UI;
 
 public class LifeComponent : MonoBehaviourPun, IPunObservable
 {
     public float ActualLife=0;
     public float MaxLife=100;
     [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private Image healthBar;
+    [SerializeField] private Image miniBar;
     [SerializeField] private float respawnTime = 3f;
 
     private SpriteRenderer sprite;
@@ -62,7 +65,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             alive = netAlive;
         }
 
-        text.text = "Player " + myView.Owner + ": " + ActualLife;
+        text.text = "Player" + myView.Owner;
+        miniBar.fillAmount = ActualLife / MaxLife;
         VisualState(alive);
     }
 
@@ -145,6 +149,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             return;
         }
         ActualLife -= damage;    
+
+        healthBar.fillAmount = ActualLife / MaxLife;
     }
 
     [PunRPC]
@@ -165,6 +171,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         {
             ActualLife = MaxLife;
         }
+        healthBar.fillAmount = ActualLife / MaxLife;
     }
 }
 
