@@ -44,6 +44,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private PhotonView myView;
 
     private bool isInvulnerable = false;
+    private float alphaValue = 1f;
+    private float netAlphaValue = 1f;
 
     public bool alive=true;
 
@@ -88,6 +90,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             ActualLife = NetActualLife;
             MaxLife = NetMaxLife;
             alive = netAlive;
+            alphaValue = netAlphaValue;
         }
 
         text.text = string.IsNullOrWhiteSpace(myView.Owner.NickName)
@@ -95,6 +98,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             : myView.Owner.NickName;
         miniBar.fillAmount = ActualLife / MaxLife;
         StopActivity(alive);
+
+        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, alphaValue);
     }
 
     private void StopActivity(bool alv)
@@ -164,10 +169,12 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         myView.RPC("AddGrenade", RpcTarget.All, 1);
         myView.RPC("AddMainAmmo", RpcTarget.All, 4);
 
-        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 0.5f);
+        alphaValue = 0.5f;
+        netAlphaValue = alphaValue;
 
         yield return new WaitForSeconds(5f);
-        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
+        alphaValue = 1f;
+        netAlphaValue = alphaValue;
         isInvulnerable = false;
     }
 
@@ -178,12 +185,14 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             stream.SendNext(ActualLife);
             stream.SendNext(MaxLife);
             stream.SendNext(alive);
+            stream.SendNext(alphaValue);
         }
         else
         {
             NetActualLife = (float)stream.ReceiveNext();
             NetMaxLife = (float)stream.ReceiveNext();
             netAlive = (bool)stream.ReceiveNext();
+            netAlphaValue = (float)stream.ReceiveNext();
         }
     }
 
