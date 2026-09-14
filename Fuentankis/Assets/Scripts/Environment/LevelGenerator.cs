@@ -20,6 +20,12 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
 
     private IEnumerator SetUpLevel(int seed)
     {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
+        seed = Random.Range(10000, 99999);
         Random.InitState(seed);
 
         int obstaclesAmount = Random.Range(obstaclesMinAmount, obstaclesMaxAmount);
@@ -29,8 +35,9 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
             int x = (int)(Random.value * (worldSpace.x));
             int y = (int)(Random.value * (worldSpace.y));
 
-            GameObject go = PhotonNetwork.Instantiate(wallPrefab.name, new Vector3(x + origin.x, y + origin.y, worldSpace.z), Quaternion.identity);
-            go.transform.localScale *= Random.value + 1;
+            GameObject go = PhotonNetwork.InstantiateRoomObject(wallPrefab.name, new Vector3(x + origin.x, y + origin.y, worldSpace.z), Quaternion.identity);
+            go.transform.localScale = new Vector3(Random.value + 1 + go.transform.localScale.x, Random.value + 0.8f + go.transform.localScale.y, go.transform.localScale.z);
+            go.transform.rotation *= Quaternion.Euler(0, 0, (Random.Range(-100, 100)));
             //Debug.Log(go.transform.localScale);
             go.transform.SetParent(gameObject.transform);
         }
