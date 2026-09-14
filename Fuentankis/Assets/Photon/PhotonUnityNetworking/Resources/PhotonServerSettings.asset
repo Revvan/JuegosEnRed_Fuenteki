@@ -39,6 +39,21 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
+  - RPC_DealDamage
+  - RPC_Death
+  - RPC_Respawn
+  - AddAmmo
+  - DestroyAmmo
+  - RemoveAmmo
+  - AddGrenade
+  - AddMainAmmo
+  - RemoveGrenade
+  - RemoveMainAmmo
+  - DestroyBullet
+  - Explode
+  - HideShield
+  - ShowShield
+  - ShieldTakeDamage
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0
