@@ -1,9 +1,12 @@
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using System;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-// Gameplay, scoring and player/arena resets will subscribe to this flow later.
+// Room flow and score snapshots. Each victim owns its death record in room properties.
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public enum RoundState { WaitingForPlayers, Countdown, Playing, RoundEnd, Results }
@@ -12,6 +15,90 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField, Range(1, 12)] private int minimumPlayers = 2;
     [SerializeField, Range(1, 12)] private int maximumPlayers = 12;
     private const string MinimumPlayersKey = "room.minimumPlayers";
+    public const string DurationKey = "room.duration";
+    private const string ScorePrefix = "score.";
+    private const string ResultsKey = "round.results";
+    public int RoundDuration => Mathf.Clamp(Read(DurationKey, 120), 60, 300);
+    public bool GameplayActive => PhotonNetwork.InRoom && State == RoundState.Playing && RemainingSeconds > 0;
+    [Serializable] public class ScoreEntry { public int actor, kills, deaths, tie; public string name; }
+    [Serializable] public class Scoreboard { public int round; public ScoreEntry[] rows = Array.Empty<ScoreEntry>(); }
+    [Serializable] private class Credit { public int actor; public string name; }
+    [Serializable] private class DeathRecord
+    {
+        public int round, actor;
+        public string name;
+        public List<Credit> credits = new List<Credit>();
+    }
+    private DeathRecord localRecord;
+    private int? requestedDuration;
+    public Scoreboard Results => JsonUtility.FromJson<Scoreboard>(Read(ResultsKey, "{}")) ?? new Scoreboard();
+
+    public override void OnEnable() { base.OnEnable(); LifeComponent.PlayerKilled += RecordDeath; }
+    public override void OnDisable() { LifeComponent.PlayerKilled -= RecordDeath; base.OnDisable(); }
+
+    // Writes only this client's record, so simultaneous deaths never overwrite each other.
+    private void RegisterLocalPlayer()
+    {
+        if (SceneManager.GetActiveScene().name != "MainGame" || RoundNumber <= 0 ||
+            (State != RoundState.Countdown && State != RoundState.Playing)) return;
+        if (localRecord != null && localRecord.round == RoundNumber) return;
+        int actor = PhotonNetwork.LocalPlayer.ActorNumber;
+        string stored = Read(ScorePrefix + actor, "");
+        localRecord = string.IsNullOrEmpty(stored) ? null : JsonUtility.FromJson<DeathRecord>(stored);
+        if (localRecord == null || localRecord.round != RoundNumber)
+            localRecord = new DeathRecord { round = RoundNumber, actor = actor,
+                name = PhotonRoomManager.NameOf(PhotonNetwork.LocalPlayer) };
+        SaveLocalRecord();
+    }
+
+    private void SaveLocalRecord() => PhotonNetwork.CurrentRoom.SetCustomProperties(
+        new Hashtable { { ScorePrefix + localRecord.actor, JsonUtility.ToJson(localRecord) } });
+
+    private void RecordDeath(int attacker, int victim, string attackerName, string victimName, int cause)
+    {
+        if (!GameplayActive || victim != PhotonNetwork.LocalPlayer.ActorNumber) return;
+        RegisterLocalPlayer();
+        if (localRecord == null) return;
+        localRecord.name = victimName;
+        localRecord.credits.Add(new Credit { actor = attacker, name = attackerName });
+        SaveLocalRecord();
+    }
+
+    public Scoreboard CalculateScores()
+    {
+        var players = new Dictionary<int, ScoreEntry>();
+        ScoreEntry Get(int actor, string name)
+        {
+            if (!players.TryGetValue(actor, out var entry))
+                players.Add(actor, entry = new ScoreEntry { actor = actor, name = name });
+            return entry;
+        }
+        if (!PhotonNetwork.InRoom) return new Scoreboard();
+        foreach (var pair in PhotonNetwork.CurrentRoom.CustomProperties)
+        {
+            if (!(pair.Key is string key) || !key.StartsWith(ScorePrefix) || !(pair.Value is string json)) continue;
+            var record = JsonUtility.FromJson<DeathRecord>(json);
+            if (record == null || record.round != RoundNumber) continue;
+            Get(record.actor, record.name).deaths += record.credits.Count;
+            foreach (var credit in record.credits)
+                if (credit.actor > 0 && credit.actor != record.actor) Get(credit.actor, credit.name).kills++;
+        }
+        var rows = new List<ScoreEntry>(players.Values);
+        foreach (var entry in rows) entry.tie = UnityEngine.Random.Range(0, int.MaxValue);
+        rows.Sort((a, b) => a.kills != b.kills ? b.kills.CompareTo(a.kills) :
+            a.deaths != b.deaths ? a.deaths.CompareTo(b.deaths) :
+            a.tie != b.tie ? a.tie.CompareTo(b.tie) : a.actor.CompareTo(b.actor));
+        return new Scoreboard { round = RoundNumber, rows = rows.ToArray() };
+    }
+
+    public void ChangeDuration(int direction)
+    {
+        if (!PhotonNetwork.InRoom || !PhotonNetwork.IsMasterClient ||
+            !(PhotonNetwork.CurrentRoom.CustomProperties[PhotonRoomManager.StartedKey] is bool started) || started) return;
+        int next = Mathf.Clamp((requestedDuration ?? RoundDuration) + Math.Sign(direction) * 15, 60, 300);
+        if (PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable { { DurationKey, next } },
+            new Hashtable { { PhotonRoomManager.StartedKey, false } })) requestedDuration = next;
+    }
     public int MinimumPlayers => Read(MinimumPlayersKey, minimumPlayers);
     public int MaximumPlayers => PhotonNetwork.InRoom ? PhotonNetwork.CurrentRoom.MaxPlayers : maximumPlayers;
 
@@ -23,14 +110,13 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public RoomOptions CreateRoomOptions() => new RoomOptions {
         MaxPlayers = (byte)maximumPlayers, PlayerTtl = 0, EmptyRoomTtl = 0,
-        CustomRoomProperties = new Hashtable { { MinimumPlayersKey, minimumPlayers } }
+        CustomRoomProperties = new Hashtable { { MinimumPlayersKey, minimumPlayers }, { DurationKey, 120 } }
     };
 
     [Header("Round timers")]
     [SerializeField, Min(1)] private float countdownSeconds = 3f;
-    [SerializeField, Range(1, 120)] private float roundSeconds = 120f;
-    [SerializeField, Min(0.1f)] private float roundEndSeconds = 1f;
-    [SerializeField, Min(1)] private float resultsSeconds = 10f;
+    [SerializeField, Min(0.1f)] private float roundEndSeconds = 2f;
+    [SerializeField, Min(1)] private float resultsSeconds = 20f;
 
     private const string StateKey = "round.state";
     private const string NumberKey = "round.number";
@@ -71,6 +157,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private void Update()
     {
         if (!PhotonNetwork.InRoom) return;
+        RegisterLocalPlayer();
         // Rooms created through the browser wait for the host's explicit start.
         if (PhotonNetwork.CurrentRoom.CustomProperties[PhotonRoomManager.StartedKey] is bool started && !started) return;
 
@@ -100,19 +187,22 @@ public class GameManager : MonoBehaviourPunCallbacks
                 if (PlayerCount < MinimumPlayers)
                     Publish(RoundState.WaitingForPlayers, 0, RoundNumber);
                 else if (RemainingSeconds <= 0)
-                    Publish(RoundState.Playing, Mathf.Clamp(roundSeconds, 1, 120), RoundNumber);
+                    Publish(RoundState.Playing, RoundDuration, RoundNumber);
                 break;
             case RoundState.Playing:
                 if (RemainingSeconds <= 0)
                     Publish(RoundState.RoundEnd, roundEndSeconds, RoundNumber);
                 break;
             case RoundState.RoundEnd:
+                if (PhotonNetwork.CurrentRoom.IsOpen) PhotonNetwork.CurrentRoom.IsOpen = false;
+                if (PhotonNetwork.CurrentRoom.IsVisible) PhotonNetwork.CurrentRoom.IsVisible = false;
                 if (RemainingSeconds <= 0)
                     Publish(RoundState.Results, resultsSeconds, RoundNumber);
                 break;
             case RoundState.Results:
-                if (RemainingSeconds <= 0)
-                    Publish(RoundState.WaitingForPlayers, 0, RoundNumber);
+                // Each gameplay client leaves when the shared results deadline expires.
+                if (PhotonNetwork.CurrentRoom.IsOpen) PhotonNetwork.CurrentRoom.IsOpen = false;
+                if (PhotonNetwork.CurrentRoom.IsVisible) PhotonNetwork.CurrentRoom.IsVisible = false;
                 break;
         }
     }
@@ -132,6 +222,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             { StateKey, (int)nextState }, { NumberKey, number },
             { DeadlineKey, duration > 0 ? PhotonNetwork.Time + duration : 0d }
         };
+        if (nextState == RoundState.Results)
+            values[ResultsKey] = JsonUtility.ToJson(CalculateScores());
         // Legacy rooms created without these options adopt the initializing Master's minimum.
         if (!compare && !PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MinimumPlayersKey))
             values[MinimumPlayersKey] = minimumPlayers;
@@ -142,12 +234,15 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnRoomPropertiesUpdate(Hashtable changed)
     {
         if (changed.ContainsKey(StateKey)) awaitingUpdate = false;
+        if (changed[DurationKey] is int duration && requestedDuration == duration) requestedDuration = null;
     }
 
     public override void OnJoinedRoom()
     {
         awaitingUpdate = false;
         lastLoggedRound = -1;
+        localRecord = null;
+        requestedDuration = null;
         Feedback = "Conectado a la sala.";
     }
 
@@ -160,6 +255,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnMasterClientSwitched(Player player)
     {
         awaitingUpdate = false;
+        requestedDuration = null;
         Feedback = player.NickName + " es el nuevo Master. El reloj continúa.";
     }
 
