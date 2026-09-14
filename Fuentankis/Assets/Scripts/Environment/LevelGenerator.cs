@@ -12,6 +12,7 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
     [SerializeField] int obstaclesMaxAmount;
     [SerializeField] GameObject wallPrefab = null;
     private bool generated;
+    private const string GeneratedKey = "arena.generated";
 
     private void Start()
     {
@@ -22,6 +23,8 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
     {
         if (generated || !PhotonNetwork.IsMasterClient) return;
         generated = true;
+        // A late joiner can become Master while waiting in RoomsScene. Reuse the cached arena.
+        if (PhotonNetwork.CurrentRoom.CustomProperties[GeneratedKey] is bool ready && ready) return;
         //seed = Random.Range(10000, 99999);
         StartCoroutine(SetUpLevel(seed));
     }
@@ -46,6 +49,8 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
                 //Debug.Log(go.transform.localScale);
                 go.transform.SetParent(gameObject.transform);
             }
+
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { GeneratedKey, true } });
 
             yield return new WaitForEndOfFrame();
         }

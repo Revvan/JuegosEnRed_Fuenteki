@@ -130,6 +130,9 @@ public class UI_Results : MonoBehaviourPunCallbacks
         else
         {
             connectionLost = true; panel.SetActive(true);
+            ShowScores(new GameManager.Scoreboard());
+            winnerName.text = "Conexión perdida";
+            statusText.color = new Color32(255, 100, 100, 255);
             statusText.text = "Desconectado: " + cause;
             countdownText.text = "Regresá a salas para reconectar.";
             roomsButton.interactable = menuButton.interactable = true;

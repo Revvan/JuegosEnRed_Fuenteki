@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class LifeComponent : MonoBehaviourPun, IPunObservable
 {
@@ -59,6 +60,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         spawner = PlayerSpawner.Instance;
         match = FindFirstObjectByType<GameManager>();
         shield = GetComponent<ShieldSystem>();
+        // Room members receive player replicas before choosing to enter gameplay.
+        if (SceneManager.GetActiveScene().name != "MainGame") collision.enabled = false;
 
         if (photonView.IsMine)
         {
@@ -69,6 +72,9 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     void Update()
     {
+        // Replicas retained across the RoomsScene -> MainGame transition need the new scene refs.
+        if (match == null) match = FindFirstObjectByType<GameManager>();
+        if (spawner == null) spawner = PlayerSpawner.Instance;
         if (photonView.IsMine)
         {
             if (alive && ActualLife <= 0)
@@ -93,7 +99,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     private void StopActivity(bool alv)
     {
-        bool canPlay = match == null || match.GameplayActive;
+        bool canPlay = SceneManager.GetActiveScene().name == "MainGame" && (match == null || match.GameplayActive);
         if (shield != null && myView.IsMine)
         {
             if ((!canPlay || !alv) && shield.isShieldActive) shield.HideShield();

@@ -20,16 +20,23 @@ public class GameManager : MonoBehaviourPunCallbacks
     private const string ResultsKey = "round.results";
     public int RoundDuration => Mathf.Clamp(Read(DurationKey, 120), 60, 300);
     public bool GameplayActive => PhotonNetwork.InRoom && State == RoundState.Playing && RemainingSeconds > 0;
-    [Serializable] public class ScoreEntry { public int actor, kills, deaths, tie; public string name; }
+    [Serializable] public class ScoreEntry { public int actor, kills, deaths, tie; public string id, name; }
     [Serializable] public class Scoreboard { public int round; public ScoreEntry[] rows = Array.Empty<ScoreEntry>(); }
-    [Serializable] private class Credit { public int actor; public string name; }
+    [Serializable] private class Credit { public int actor; public string id, name; }
     [Serializable] private class DeathRecord
     {
         public int round, actor;
-        public string name;
+        public string id, name;
         public List<Credit> credits = new List<Credit>();
     }
     private DeathRecord localRecord;
+    public bool HasParticipated(string id)
+    {
+        string stored = Read(ScorePrefix + id, "");
+        if (string.IsNullOrEmpty(stored)) return false;
+        var record = JsonUtility.FromJson<DeathRecord>(stored);
+        return record != null && record.round == RoundNumber;
+    }
     private int? requestedDuration;
     public Scoreboard Results => JsonUtility.FromJson<Scoreboard>(Read(ResultsKey, "{}")) ?? new Scoreboard();
 
@@ -43,16 +50,29 @@ public class GameManager : MonoBehaviourPunCallbacks
             (State != RoundState.Countdown && State != RoundState.Playing)) return;
         if (localRecord != null && localRecord.round == RoundNumber) return;
         int actor = PhotonNetwork.LocalPlayer.ActorNumber;
-        string stored = Read(ScorePrefix + actor, "");
+        string id = PlayerIdentity.LocalId;
+        string stored = Read(ScorePrefix + id, "");
         localRecord = string.IsNullOrEmpty(stored) ? null : JsonUtility.FromJson<DeathRecord>(stored);
         if (localRecord == null || localRecord.round != RoundNumber)
-            localRecord = new DeathRecord { round = RoundNumber, actor = actor,
+            localRecord = new DeathRecord { round = RoundNumber, actor = actor, id = id,
                 name = PhotonRoomManager.NameOf(PhotonNetwork.LocalPlayer) };
+        localRecord.name = PhotonRoomManager.NameOf(PhotonNetwork.LocalPlayer);
         SaveLocalRecord();
     }
 
     private void SaveLocalRecord() => PhotonNetwork.CurrentRoom.SetCustomProperties(
-        new Hashtable { { ScorePrefix + localRecord.actor, JsonUtility.ToJson(localRecord) } });
+        new Hashtable {
+            { ScorePrefix + localRecord.id, JsonUtility.ToJson(localRecord) },
+            // Keep old connection aliases after departure, including for projectiles still in flight.
+            { "identity." + PhotonNetwork.LocalPlayer.ActorNumber, localRecord.id }
+        });
+
+    private static string IdentityFor(int actor)
+    {
+        string stored = Read("identity." + actor, "");
+        if (!string.IsNullOrEmpty(stored)) return stored;
+        return PhotonNetwork.CurrentRoom.GetPlayer(actor)?.UserId ?? "";
+    }
 
     private void RecordDeath(int attacker, int victim, string attackerName, string victimName, int cause)
     {
@@ -60,17 +80,19 @@ public class GameManager : MonoBehaviourPunCallbacks
         RegisterLocalPlayer();
         if (localRecord == null) return;
         localRecord.name = victimName;
-        localRecord.credits.Add(new Credit { actor = attacker, name = attackerName });
+        localRecord.credits.Add(new Credit { actor = attacker, id = IdentityFor(attacker), name = attackerName });
         SaveLocalRecord();
     }
 
     public Scoreboard CalculateScores()
     {
-        var players = new Dictionary<int, ScoreEntry>();
-        ScoreEntry Get(int actor, string name)
+        var players = new Dictionary<string, ScoreEntry>();
+        ScoreEntry Get(string id, int actor, string name)
         {
-            if (!players.TryGetValue(actor, out var entry))
-                players.Add(actor, entry = new ScoreEntry { actor = actor, name = name });
+            if (string.IsNullOrEmpty(id)) id = "actor:" + actor; // Legacy records never merge by nickname.
+            if (!players.TryGetValue(id, out var entry))
+                players.Add(id, entry = new ScoreEntry { id = id, actor = actor, name = name });
+            entry.actor = Mathf.Min(entry.actor, actor); // Keep the original display color on reconnect.
             return entry;
         }
         if (!PhotonNetwork.InRoom) return new Scoreboard();
@@ -79,9 +101,13 @@ public class GameManager : MonoBehaviourPunCallbacks
             if (!(pair.Key is string key) || !key.StartsWith(ScorePrefix) || !(pair.Value is string json)) continue;
             var record = JsonUtility.FromJson<DeathRecord>(json);
             if (record == null || record.round != RoundNumber) continue;
-            Get(record.actor, record.name).deaths += record.credits.Count;
+            var victim = Get(record.id, record.actor, record.name);
+            victim.name = record.name;
+            victim.deaths += record.credits.Count;
             foreach (var credit in record.credits)
-                if (credit.actor > 0 && credit.actor != record.actor) Get(credit.actor, credit.name).kills++;
+                if (credit.actor > 0 && (string.IsNullOrEmpty(credit.id)
+                    ? credit.actor != record.actor : credit.id != record.id))
+                    Get(credit.id, credit.actor, credit.name).kills++;
         }
         var rows = new List<ScoreEntry>(players.Values);
         foreach (var entry in rows) entry.tie = UnityEngine.Random.Range(0, int.MaxValue);
@@ -109,7 +135,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
     public RoomOptions CreateRoomOptions() => new RoomOptions {
-        MaxPlayers = (byte)maximumPlayers, PlayerTtl = 0, EmptyRoomTtl = 0,
+        MaxPlayers = (byte)maximumPlayers, PlayerTtl = 0, EmptyRoomTtl = 0, PublishUserId = true,
         CustomRoomProperties = new Hashtable { { MinimumPlayersKey, minimumPlayers }, { DurationKey, 120 } }
     };
 

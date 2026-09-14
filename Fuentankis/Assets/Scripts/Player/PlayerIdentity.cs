@@ -1,11 +1,33 @@
 using System.Text;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
 public static class PlayerIdentity
 {
     public const int MaxNameLength = 20;
     private const string NameKey = "PlayerName";
+    private const string IdKey = "PlayerId";
+
+    // ActorNumber changes on a fresh join. UserId identifies this local profile across joins.
+    public static string LocalId
+    {
+        get { PrepareNetworkIdentity(); return PhotonNetwork.AuthValues.UserId; }
+    }
+
+    public static void PrepareNetworkIdentity()
+    {
+        if (PhotonNetwork.AuthValues == null) PhotonNetwork.AuthValues = new AuthenticationValues();
+        if (!string.IsNullOrEmpty(PhotonNetwork.AuthValues.UserId)) return;
+        string id = PlayerPrefs.GetString(IdKey, "");
+        if (string.IsNullOrEmpty(id))
+        {
+            id = System.Guid.NewGuid().ToString("N");
+            PlayerPrefs.SetString(IdKey, id);
+            PlayerPrefs.Save();
+        }
+        PhotonNetwork.AuthValues.UserId = id;
+    }
 
     public static string LoadName()
     {
@@ -14,13 +36,14 @@ public static class PlayerIdentity
 
     public static string SaveName(string value)
     {
+        PrepareNetworkIdentity();
         string name = NormalizeName(value);
         if (string.IsNullOrEmpty(name))
             name = "Jugador" + Random.Range(1000, 10000);
 
         PlayerPrefs.SetString(NameKey, name);
         PlayerPrefs.Save();
-        // NickName is already synchronized by Photon. ActorNumber remains the room identity.
+        // NickName is display-only; changing it does not create another score profile.
         PhotonNetwork.NickName = name;
         return name;
     }
