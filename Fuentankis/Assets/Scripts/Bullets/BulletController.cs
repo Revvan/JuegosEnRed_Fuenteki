@@ -6,7 +6,6 @@ public class BulletController : BulletBase
     [SerializeField] float lifetime = 5.0f;
     private float lifeStartTime = 0;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
         lifeStartTime = Time.time;
@@ -20,7 +19,6 @@ public class BulletController : BulletBase
         { return; }
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!myView.IsMine)
@@ -40,22 +38,17 @@ public class BulletController : BulletBase
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //Debug.Log("trigger");
+        if (!myView.IsMine)
+            return;
 
         if (collision.gameObject.CompareTag("Player"))
         {
-            //Debug.Log("Player");
-
             PhotonView otherPV = collision.gameObject.GetComponent<PhotonView>();
 
             if (otherPV.Owner != myView.Owner)
             {
                 otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
 
-                //Debug.Log("not mine");
-                //LifeComponent playerLife = collision.gameObject.GetComponent<LifeComponent>();
-                //playerLife.DealDamage(damage);
-                //playerLife.printShit("i touched you");
                 PhotonNetwork.Destroy(gameObject);
             }
         }
@@ -64,11 +57,79 @@ public class BulletController : BulletBase
         {
             ShieldObject shieldObject = collision.gameObject.GetComponent<ShieldObject>();
 
-            if (shieldObject.MyView.Owner != myView.Owner)
+            if (shieldObject == null)
             {
-                shieldObject.ShieldTakeDamage();
+                return;
+            }
+
+            ShieldSystem shieldSystem = shieldObject.ShieldSystem;
+
+            if (shieldSystem == null)
+            {
+                print("ShieldSystem is null");
+                return;
+            }
+
+            if (shieldSystem.photonView.Owner != myView.Owner)
+            {
+                shieldSystem.photonView.RPC(nameof(ShieldSystem.ShieldTakeDamage), shieldSystem.photonView.Owner, shieldObject.SegmentIndex);
+
                 PhotonNetwork.Destroy(gameObject);
             }
         }
+
+
     }
 }
+
+
+//if (collision.gameObject.CompareTag("Shield"))
+//{
+//    ShieldObject shieldObject = collision.gameObject.GetComponent<ShieldObject>();
+
+//    if (shieldObject.MyView.Owner != myView.Owner)
+//    {
+//        shieldObject.ShieldTakeDamage();
+//        PhotonNetwork.Destroy(gameObject);
+//    }
+//}
+
+//if (collision.gameObject.CompareTag("Shield"))
+//{
+//    ShieldObject shieldObject = collision.gameObject.GetComponent<ShieldObject>();
+
+//    if (shieldObject == null)
+//    {
+//        return;
+//    }
+
+//    if (shieldObject.MyView.Owner != myView.Owner)
+//    {
+//        shieldObject.MyView.RPC(nameof(shieldObject.ShieldSystem.ShieldTakeDamage), RpcTarget.All, shieldObject.SegmentIndex);
+
+//        PhotonNetwork.Destroy(gameObject);
+//    }
+//}
+
+//if (collision.gameObject.CompareTag("Shield"))
+//{
+//    if (!myView.IsMine)
+//        return;
+
+//    ShieldObject shieldObject = collision.gameObject.GetComponent<ShieldObject>();
+
+//    if (shieldObject == null)
+//        return;
+
+//    ShieldSystem shieldSystem = shieldObject.GetComponentInParent<ShieldSystem>();
+
+//    if (shieldSystem == null)
+//        return;
+
+//    if (shieldSystem.photonView.Owner != myView.Owner)
+//    {
+//        shieldSystem.photonView.RPC(nameof(ShieldSystem.ShieldTakeDamage), shieldSystem.photonView.Owner, shieldObject.SegmentIndex);
+
+//        PhotonNetwork.Destroy(gameObject);
+//    }
+//}

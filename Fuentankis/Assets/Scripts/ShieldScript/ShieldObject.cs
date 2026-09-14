@@ -3,19 +3,28 @@ using UnityEngine;
 
 public class ShieldObject : MonoBehaviourPun
 {
-    private PhotonView myView;
+    //private PhotonView myView;
+    //public PhotonView MyView => myView;
+
     private ShieldSystem shieldSystem;
+    public ShieldSystem ShieldSystem => shieldSystem;
 
-    public PhotonView MyView => myView;
+    private int segmentIndex;
+    public int SegmentIndex => segmentIndex;
 
-    private void Awake()
+    //private void Awake()
+    //{
+    //    myView = GetComponent<PhotonView>();
+    //}
+
+    public void Initialize(ShieldSystem system, int index)
     {
-        myView = GetComponent<PhotonView>();
-        shieldSystem = GetComponentInParent<ShieldSystem>();
+        shieldSystem = system;
+        segmentIndex = index;
     }
 
     public void ShieldTakeDamage()
     {
-        shieldSystem.ShieldTakeDamage();
+        shieldSystem.ShieldTakeDamage(segmentIndex);
     }
 }

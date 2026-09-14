@@ -27,7 +27,7 @@ public class Weapon : MonoBehaviourPun
     void Awake()
     {
         myView = GetComponent<PhotonView>();
-        Debug.Log(myView);
+        
         if (bulletPrefab == null)
         {
             Debug.LogError("no bullet prefab bro...");
@@ -51,7 +51,6 @@ public class Weapon : MonoBehaviourPun
     {
         if (Keyboard.current != null)
         {
-            //Keyboard.current.spaceKey.isPressed
             if (keyToShoot != Key.None && Keyboard.current[keyToShoot].isPressed)
             {
                 if (HasAmmo())
@@ -91,7 +90,6 @@ public class Weapon : MonoBehaviourPun
     {
         ammoCount += amount;
         netAmmoCount += amount;
-        //print("Here in add ammo");
     }
 
     public void RemoveAmmo(int amount)
