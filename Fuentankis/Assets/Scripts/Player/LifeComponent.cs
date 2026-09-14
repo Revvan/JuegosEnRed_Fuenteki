@@ -110,7 +110,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             if ((!canPlay || !alv) && shield.isShieldActive) shield.HideShield();
             shield.enabled = canPlay && alv;
         }
-        if (!canPlay && myView.IsMine)
+        if ((!canPlay || !alv) && myView.IsMine)
         {
             var body = GetComponent<Rigidbody2D>();
             body.linearVelocity = Vector2.zero;
@@ -151,7 +151,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     {
         if(!alive) { return; }
         alive = false;
-        photonView.RPC(nameof(RPC_Death), RpcTarget.All, ++deathSequence,
+
+        photonView.RPC("RPC_Death", RpcTarget.All, ++deathSequence,
             LastAttackerActorNumber, lastAttackerName, PlayerName(myView.Owner), lethalCause);
         StartCoroutine(RespawnRoutine());
     }
@@ -230,10 +231,14 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     public void RPC_Death(int sequence, int attacker, string attackerName,
         string victimName, int cause, PhotonMessageInfo info)
     {
+        Debug.Log("Muelto");
+        
         if (info.Sender != myView.Owner || sequence <= receivedDeathSequence) return;
         receivedDeathSequence = sequence;
         alive = false;
         netAlive = false;
+
+        StopActivity(false);
 
         var rb = GetComponent<Rigidbody2D>();
         if (rb != null)
