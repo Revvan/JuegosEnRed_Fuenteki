@@ -7,6 +7,17 @@ using UnityEngine.UI;
 
 public class LifeComponent : MonoBehaviourPun, IPunObservable
 {
+    // Raised locally on every client by the victim's unbuffered death RPC.
+    // Actor numbers are stable identifiers within the room; names are display snapshots.
+    public static event System.Action<int, int, string, string, int> PlayerKilled;
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetEvents() => PlayerKilled = null;
+    public int LastAttackerActorNumber { get; private set; }
+    private string lastAttackerName = "";
+    private int lethalCause;
+    private int deathSequence;
+    private int receivedDeathSequence;
+
     public float ActualLife=0;
     public float MaxLife=100;
     [SerializeField] private TextMeshProUGUI text;
@@ -113,7 +124,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     {
         if(!alive) { return; }
         alive = false;
-        photonView.RPC("RPC_Death", RpcTarget.All);
+        photonView.RPC(nameof(RPC_Death), RpcTarget.All, ++deathSequence,
+            LastAttackerActorNumber, lastAttackerName, PlayerName(myView.Owner), lethalCause);
         StartCoroutine(RespawnRoutine());
     }
 
@@ -157,25 +169,35 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     }
 
     [PunRPC]
-    public void RPC_DealDamage(float damage)
+    public void RPC_DealDamage(float damage, int cause, PhotonMessageInfo info)
     {
         if (!myView.IsMine)
         {
             return;
         }
 
-        if(isInvulnerable || !alive)
+        if(isInvulnerable || !alive || ActualLife <= 0 || damage <= 0
+            || float.IsNaN(damage) || float.IsInfinity(damage) || info.Sender == null)
         {
             return;
         }
         ActualLife -= damage;    
+        if (ActualLife <= 0)
+        {
+            LastAttackerActorNumber = info.Sender.ActorNumber;
+            lastAttackerName = PlayerName(info.Sender);
+            lethalCause = cause == 1 ? 1 : 0;
+        }
 
         healthBar.fillAmount = ActualLife / MaxLife;
     }
 
     [PunRPC]
-    public void RPC_Death()
+    public void RPC_Death(int sequence, int attacker, string attackerName,
+        string victimName, int cause, PhotonMessageInfo info)
     {
+        if (info.Sender != myView.Owner || sequence <= receivedDeathSequence) return;
+        receivedDeathSequence = sequence;
         alive = false;
         netAlive = false;
 
@@ -185,7 +207,11 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
         }
+        PlayerKilled?.Invoke(attacker, myView.OwnerActorNr, attackerName, victimName, cause);
     }
+
+    private static string PlayerName(Photon.Realtime.Player player) =>
+        string.IsNullOrWhiteSpace(player.NickName) ? "Jugador" + player.ActorNumber : player.NickName;
 
     [PunRPC]
 
@@ -196,9 +222,13 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         netAlive = true;
         if(myView.IsMine)
         {
+            LastAttackerActorNumber = 0;
+            lastAttackerName = "";
+            lethalCause = 0;
             ActualLife = MaxLife;
+            // UISync destroys the private HUD on remote player copies.
+            healthBar.fillAmount = ActualLife / MaxLife;
         }
-        healthBar.fillAmount = ActualLife / MaxLife;
     }
 }
 
