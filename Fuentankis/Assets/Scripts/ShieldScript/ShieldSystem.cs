@@ -2,6 +2,8 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine.UI;
 
 public class ShieldSystem : MonoBehaviourPun, IPunObservable
 {
