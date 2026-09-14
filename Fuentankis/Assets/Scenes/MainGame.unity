@@ -897,7 +897,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BulletSpawn
   ammo_prefab: {fileID: 6311065262216992779, guid: 541f5d8c759a0624799f294f6043b5c4, type: 3}
   spawn_container: {fileID: 1658262428}
-  spawn_position: {x: 1, y: 1}
   spawnTime: 5
 --- !u!114 &1658262431
 MonoBehaviour:
