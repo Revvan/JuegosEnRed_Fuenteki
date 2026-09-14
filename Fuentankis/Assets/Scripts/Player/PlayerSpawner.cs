@@ -10,6 +10,7 @@ public class PlayerSpawner : MonoBehaviourPun
 
     [SerializeField] private List<Transform> spawnPoint;
     public int playerCount = 0;
+    private bool spawned;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     private void Awake()
@@ -20,6 +21,7 @@ public class PlayerSpawner : MonoBehaviourPun
     void Start()
     {
         PhotonManager.Instance.OnRoom += PlayerJoinedRoom;
+        if (PhotonNetwork.InRoom) PlayerJoinedRoom();
         if(spawnPoint.Count <=0){
             //Debug.Log("no spawn point");
         }
@@ -37,7 +39,15 @@ public class PlayerSpawner : MonoBehaviourPun
 
 
     private void PlayerJoinedRoom(){
+        if (spawned) return;
+        spawned = true;
         SpawnPlayer();
+    }
+
+    private void OnDestroy()
+    {
+        if (PhotonManager.Instance != null) PhotonManager.Instance.OnRoom -= PlayerJoinedRoom;
+        if (Instance == this) Instance = null;
     }
 
     public Transform RandomSpawnPoint()

@@ -11,9 +11,17 @@ public class LevelGenerator : MonoBehaviourPunCallbacks
     [SerializeField] int obstaclesMinAmount;
     [SerializeField] int obstaclesMaxAmount;
     [SerializeField] GameObject wallPrefab = null;
+    private bool generated;
+
+    private void Start()
+    {
+        if (PhotonNetwork.InRoom) OnJoinedRoom();
+    }
 
     public override void OnJoinedRoom()
     {
+        if (generated || !PhotonNetwork.IsMasterClient) return;
+        generated = true;
         //seed = Random.Range(10000, 99999);
         StartCoroutine(SetUpLevel(seed));
     }

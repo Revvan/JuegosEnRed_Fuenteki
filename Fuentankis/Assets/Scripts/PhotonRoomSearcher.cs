@@ -20,15 +20,20 @@ public class PhotonRoomSearcher : MonoBehaviourPunCallbacks
 
     private IEnumerator Start()
     {
-        yield return null; // UI_RoomLIst initializes its list in Start.
+        yield return null; // Let the scene controls finish initializing.
         uiReady = true;
         ui_RoomLIst.Refresh_List();
     }
     public void FetchRooms()
     {
-        Debug.Log("RefreshButton");
+        if (uiReady) ui_RoomLIst.Refresh_List(); // Photon pushes room changes automatically.
+    }
 
-        
+    public override void OnLeftLobby()
+    {
+        cachedRooms.Clear();
+        local_roomList = new List<RoomInfo>();
+        if (uiReady) ui_RoomLIst.Refresh_List();
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)

@@ -60,7 +60,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("Joined to Lobby");
         if (Instance.RoomSearcher == null)
         {
-            PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room");
+            var gameManager = FindFirstObjectByType<GameManager>();
+            PhotonNetwork.JoinRandomOrCreateRoom(roomName: "new room",
+                roomOptions: gameManager != null ? gameManager.CreateRoomOptions() : null);
         }
         else { 
             RoomSearcher.FetchRooms();
