@@ -1,6 +1,14 @@
 using UnityEngine;
 using Photon.Pun;
 
+/// <summary>
+/// Central manager for Photon networking.
+///
+/// Handles the connection flow, lobby and room callbacks,
+/// room joining, and communication between Photon and
+/// other gameplay systems.
+/// </summary>
+
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
     public PhotonRoomSearcher RoomSearcher;
@@ -25,7 +33,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
         Instance = this;
 
-        PhotonNetwork.ConnectUsingSettings();
+        // Reuse an existing Photon connection when coming from the Main Menu.
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            // Connected, but not currently in a Lobby or Room.
+            if (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom)
+                PhotonNetwork.JoinLobby();
+        }
+        else if (!PhotonNetwork.IsConnected)
+        {
+            // No Photon connection exists yet. This also allows this scene to work when launched directly for testing.
+            PhotonNetwork.ConnectUsingSettings();
+        }
 
     }
 
@@ -59,7 +78,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         string roonName = PhotonNetwork.CurrentRoom.Name;
         int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
         Debug.Log("Room name: " + roonName + " | PlayerCount: " + playerCount);
-        OnRoom();
+        OnRoom?.Invoke();
     }
 
       

@@ -69,7 +69,9 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             alive = netAlive;
         }
 
-        text.text = "Player" + myView.Owner;
+        text.text = string.IsNullOrWhiteSpace(myView.Owner.NickName)
+            ? "Jugador" + myView.OwnerActorNr
+            : myView.Owner.NickName;
         miniBar.fillAmount = ActualLife / MaxLife;
         StopActivity(alive);
     }
