@@ -1,7 +1,9 @@
 using Photon.Pun;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ShieldSystem : MonoBehaviourPun, IPunObservable
 {
@@ -11,6 +13,8 @@ public class ShieldSystem : MonoBehaviourPun, IPunObservable
     [SerializeField] private GameObject shieldPrefab;
     [SerializeField] private Transform ShieldTransform;
     [SerializeField] private float radio = 2.0f;
+    [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private Image bar;
 
     private Vector3 netShieldPosition;
     private Quaternion netShieldRotation;
@@ -93,12 +97,16 @@ public class ShieldSystem : MonoBehaviourPun, IPunObservable
     {
         isShieldActive = true;
         shieldPrefab.SetActive(true);
+        text.text = "Active";
+        bar.fillAmount = 1f;
     }
 
     public void HideShield()
     {
         isShieldActive = false;
         shieldPrefab.SetActive(false);
+        text.text = "Inactive";
+        bar.fillAmount = 0f;
     }
 
     public void ShieldTakeDamage()

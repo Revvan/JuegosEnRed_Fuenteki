@@ -17,7 +17,9 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private SpriteRenderer sprite;
     private Collider2D collision;
     private PlayerMovement pMove;
-    private PlayerWeapon pWeap;
+    private PlayerWeaponsController pWeapCont;
+    private PlayerWeapon pWep;
+    private GrenadeLauncher gLaunch;
     
     private PlayerSpawner spawner;
 
@@ -38,7 +40,9 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         sprite = GetComponentInChildren<SpriteRenderer>();
         collision = GetComponent<Collider2D>();
         pMove = GetComponent<PlayerMovement>();
-        pWeap = GetComponent<PlayerWeapon>();
+        pWeapCont = GetComponent<PlayerWeaponsController>();
+        pWep = GetComponent<PlayerWeapon>();
+        gLaunch = GetComponent<GrenadeLauncher>();
         spawner = PlayerSpawner.Instance;
 
         if (photonView.IsMine)
@@ -67,10 +71,10 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
         text.text = "Player" + myView.Owner;
         miniBar.fillAmount = ActualLife / MaxLife;
-        VisualState(alive);
+        StopActivity(alive);
     }
 
-    private void VisualState(bool alv)
+    private void StopActivity(bool alv)
     {
         if(sprite != null) 
         {
@@ -87,9 +91,19 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             pMove.enabled = alv && myView.IsMine;
         }
 
-        if (pWeap != null)
+        if (pWeapCont != null)
         {
-            pWeap.enabled = alv && myView.IsMine;
+            pWeapCont.enabled = alv && myView.IsMine;
+        }
+
+        if(pWep != null)
+        { 
+            pWep.enabled = alv && myView.IsMine;
+        }
+
+        if(gLaunch != null)
+        {
+            gLaunch.enabled = alv && myView.IsMine;
         }
     }
 
@@ -107,7 +121,6 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
         Transform spPoint = spawner.RandomSpawnPoint();
         ActualLife = MaxLife;
-        alive = true;
         isInvulnerable = true;
 
         myView.RPC("RPC_Respawn", RpcTarget.All, spPoint.position);
@@ -158,6 +171,13 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     {
         alive = false;
         netAlive = false;
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
     }
 
     [PunRPC]
