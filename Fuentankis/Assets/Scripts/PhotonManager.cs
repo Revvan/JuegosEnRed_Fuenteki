@@ -17,6 +17,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public OnRoomCallback OnRoom;
 
     public static PhotonManager Instance;
+    // Results UI owns the return flow while this gameplay scene is being unloaded.
+    public bool LeavingGameplay { get; set; }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -50,6 +52,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
+        if (LeavingGameplay) return;
         Debug.Log("Connected to Server");
         PhotonNetwork.JoinLobby();
 
@@ -57,6 +60,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
+        if (LeavingGameplay) return;
         Debug.Log("Joined to Lobby");
         if (Instance.RoomSearcher == null)
         {

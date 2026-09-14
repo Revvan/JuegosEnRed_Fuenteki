@@ -39,7 +39,7 @@ public class UI_RoundStatus : MonoBehaviour
                 statusText.text = "Tiempo de ronda terminado";
                 break;
             case GameManager.RoundState.Results:
-                statusText.text = $"Results • Nuevo countdown en {seconds} s\nRanking pendiente de F08";
+                statusText.text = $"Resultados • Volviendo a salas en {seconds} s";
                 break;
         }
     }

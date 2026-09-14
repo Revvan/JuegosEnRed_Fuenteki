@@ -33,6 +33,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private GrenadeLauncher gLaunch;
     
     private PlayerSpawner spawner;
+    private GameManager match;
+    private ShieldSystem shield;
 
     private float NetActualLife;
     private float NetMaxLife;
@@ -55,6 +57,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         pWep = GetComponent<PlayerWeapon>();
         gLaunch = GetComponent<GrenadeLauncher>();
         spawner = PlayerSpawner.Instance;
+        match = FindFirstObjectByType<GameManager>();
+        shield = GetComponent<ShieldSystem>();
 
         if (photonView.IsMine)
         {
@@ -89,6 +93,18 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     private void StopActivity(bool alv)
     {
+        bool canPlay = match == null || match.GameplayActive;
+        if (shield != null && myView.IsMine)
+        {
+            if ((!canPlay || !alv) && shield.isShieldActive) shield.HideShield();
+            shield.enabled = canPlay && alv;
+        }
+        if (!canPlay && myView.IsMine)
+        {
+            var body = GetComponent<Rigidbody2D>();
+            body.linearVelocity = Vector2.zero;
+            body.angularVelocity = 0;
+        }
         if(sprite != null) 
         {
             sprite.enabled = alv;
@@ -96,27 +112,27 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
         if (collision != null)
         {
-            collision.enabled = alv;
+            collision.enabled = alv && canPlay;
         }
 
         if (pMove != null)
         {
-            pMove.enabled = alv && myView.IsMine;
+            pMove.enabled = alv && myView.IsMine && canPlay;
         }
 
         if (pWeapCont != null)
         {
-            pWeapCont.enabled = alv && myView.IsMine;
+            pWeapCont.enabled = alv && myView.IsMine && canPlay;
         }
 
         if(pWep != null)
         { 
-            pWep.enabled = alv && myView.IsMine;
+            pWep.enabled = alv && myView.IsMine && canPlay;
         }
 
         if(gLaunch != null)
         {
-            gLaunch.enabled = alv && myView.IsMine;
+            gLaunch.enabled = alv && myView.IsMine && canPlay;
         }
     }
 
@@ -132,6 +148,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private IEnumerator RespawnRoutine()
     {
         yield return new WaitForSeconds(respawnTime);
+        if (match != null && !match.GameplayActive) yield break;
 
         Transform spPoint = spawner.RandomSpawnPoint();
         ActualLife = MaxLife;
@@ -176,7 +193,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             return;
         }
 
-        if(isInvulnerable || !alive || ActualLife <= 0 || damage <= 0
+        if((match != null && !match.GameplayActive) || isInvulnerable || !alive || ActualLife <= 0 || damage <= 0
             || float.IsNaN(damage) || float.IsInfinity(damage) || info.Sender == null)
         {
             return;
@@ -190,6 +207,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         }
 
         healthBar.fillAmount = ActualLife / MaxLife;
+        // Resolve accepted lethal hits now, before a frame boundary can end the round.
+        if (ActualLife <= 0) Die();
     }
 
     [PunRPC]

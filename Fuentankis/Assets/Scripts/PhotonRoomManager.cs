@@ -16,6 +16,8 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ChatEvent = 41;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private TMP_Text minimumPlayersText, maximumPlayersText;
+    [SerializeField] private TMP_Text durationText;
+    [SerializeField] private Button decreaseDurationButton, increaseDurationButton;
     [SerializeField] private TMP_InputField roomNameInput;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private GameObject browserPanel, enteredPanel;
@@ -49,6 +51,13 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
         enteredPanel.SetActive(inRoom);
         createButton.interactable = PhotonNetwork.InLobby && !Busy;
         if (!inRoom) return;
+        int duration = gameManager.RoundDuration;
+        durationText.text = $"Tiempo de ronda\n{duration / 60:00}:{duration % 60:00}";
+        bool canConfigure = PhotonNetwork.IsMasterClient && !HasStarted && !Busy && !startRequested;
+        decreaseDurationButton.interactable = canConfigure && duration > 60;
+        increaseDurationButton.interactable = canConfigure && duration < 300;
+        if (gameManager.State == GameManager.RoundState.Results && gameManager.RemainingSeconds <= 0 && !Busy)
+        { Back(); return; }
         roomTitle.text = "SALA: " + PhotonNetwork.CurrentRoom.Name;
         minimumPlayersText.text = "Jugadores mínimos\n" + gameManager.MinimumPlayers;
         maximumPlayersText.text = "Máximo de jugadores\n" + (gameManager.MaximumPlayers == 0 ? "Sin límite" : gameManager.MaximumPlayers.ToString());
@@ -71,6 +80,9 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
         busy = PhotonNetwork.CreateRoom(name, options);
         statusText.text = busy ? "Creando sala..." : "No se pudo enviar la solicitud.";
     }
+
+    public void IncreaseDuration() { if (!Busy && !startRequested) gameManager.ChangeDuration(1); }
+    public void DecreaseDuration() { if (!Busy && !startRequested) gameManager.ChangeDuration(-1); }
 
     public void JoinRoom(string name)
     {
