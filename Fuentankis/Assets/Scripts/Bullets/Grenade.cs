@@ -25,31 +25,35 @@ public class Grenade : BulletBase
     // Update is called once per frame
     void Update()
     {
-        if (startTime + granadeTimer < Time.realtimeSinceStartup)
+        if (photonView.IsMine)
         {
-            myView.RPC(nameof(Explode), RpcTarget.All);
-            //Debug.Log("chau grenade");
+            if (startTime + granadeTimer < Time.realtimeSinceStartup)
+            {
+
+                myView.RPC(nameof(Explode), RpcTarget.All);
+
+                //Debug.Log("chau grenade");
+            }
         }
     }
 
     [PunRPC]
     public void Explode()
     {
-        if (photonView.IsMine)
+        
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius, playerMask);
+
+        // Apply damage to each valid enemy
+        foreach (Collider2D hit in hits)
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius, playerMask);
+            //if (hit.gameObject.CompareTag("Player"))
 
-            // Apply damage to each valid enemy
-            foreach (Collider2D hit in hits)
-            {
-                //if (hit.gameObject.CompareTag("Player"))
-
-                PhotonView otherPV = hit.gameObject.GetComponent<PhotonView>();
-                otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
-            }
-            SpawnBullets();
-            PhotonNetwork.Destroy(gameObject);
+            PhotonView otherPV = hit.gameObject.GetComponent<PhotonView>();
+            otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
         }
+        SpawnBullets();
+        PhotonNetwork.Destroy(gameObject);
+        
     }
     
     public void SpawnBullets()

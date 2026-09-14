@@ -126,8 +126,13 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         isInvulnerable = true;
 
         myView.RPC("RPC_Respawn", RpcTarget.All, spPoint.position);
-        
+        myView.RPC("AddGrenade", RpcTarget.All, 1);
+        myView.RPC("AddMainAmmo", RpcTarget.All, 4);
+
+        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 0.5f);
+
         yield return new WaitForSeconds(5f);
+        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
         isInvulnerable = false;
     }
 
