@@ -1,14 +1,18 @@
 using Photon.Pun;
 using System;
+using Unity.Mathematics.Geometry;
 using UnityEngine;
 
 public class Grenade : BulletBase
 {
-    [SerializeField] GameObject bulletPrefab;
     [SerializeField] private float granadeTimer = 2f;
     [SerializeField] private float explosionRadius = 1.5f;
     [SerializeField] private LayerMask playerMask;
+    [SerializeField] GameObject bulletPrefab;
+    [SerializeField] float bulletForce = 8f;
     private float startTime;
+
+    [SerializeField] int bulletAmount = 8;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -24,7 +28,7 @@ public class Grenade : BulletBase
         if (startTime + granadeTimer < Time.realtimeSinceStartup)
         {
             myView.RPC(nameof(Explode), RpcTarget.All);
-            Debug.Log("chau granade");
+            //Debug.Log("chau grenade");
         }
     }
 
@@ -43,22 +47,29 @@ public class Grenade : BulletBase
                 PhotonView otherPV = hit.gameObject.GetComponent<PhotonView>();
                 otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage);
             }
-
+            SpawnBullets();
             PhotonNetwork.Destroy(gameObject);
         }
-        
     }
     
+    public void SpawnBullets()
+    {
+        for (int i = 1; i <= bulletAmount; i++)
+        {
+            Vector3 dir = CalcBulletDirection(i, bulletAmount);
+            Debug.Log(dir);
+            float dirRot = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
+            BulletBase bullet = PhotonNetwork.Instantiate(bulletPrefab.name, transform.position, Quaternion.Euler(0, 0, dirRot)).GetComponent<BulletBase>();
+            bullet.BulletImpulse(dir, bulletForce);
+        }
+        
 
-    //public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    //{
-    //    if (stream.IsWriting)
-    //    {
+    }
 
-    //    }
-    //    else
-    //    {
+    public Vector3 CalcBulletDirection(float bulletNum, float bulletTotal)
+    {
+        float angle = ((bulletNum - 1f) / bulletTotal) * Mathf.PI * 2f;
 
-    //    }
-    //}
+        return new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0);
+    }
 }

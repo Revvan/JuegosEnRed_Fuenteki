@@ -12,4 +12,9 @@ public class BulletBase : MonoBehaviourPun
     {
         rb.AddForce(trns.up * shootingForce, ForceMode2D.Impulse);
     }
+
+    public void BulletImpulse(Vector3 dir, float shootingForce)
+    {
+        rb.AddForce(dir * shootingForce, ForceMode2D.Impulse);
+    }
 }

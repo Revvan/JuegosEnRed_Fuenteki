@@ -26,8 +26,8 @@ Transform:
   m_GameObject: {fileID: 788973649987676410}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.41111937, w: 0.9115816}
-  m_LocalPosition: {x: 0.095, y: 0.21, z: 0}
-  m_LocalScale: {x: 0.15773202, y: 0.04462357, z: 1}
+  m_LocalPosition: {x: 0.1408, y: 0.30906, z: 0}
+  m_LocalScale: {x: 0.22932312, y: 0.06487722, z: 1.453878}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4377797995229649606}
@@ -117,8 +117,8 @@ Transform:
   m_GameObject: {fileID: 2962573523912724588}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.21, z: 0}
-  m_LocalScale: {x: 0.14706637, y: 0.07755226, z: 1}
+  m_LocalPosition: {x: 0.0026868, y: 0.30906, z: 0}
+  m_LocalScale: {x: 0.21381657, y: 0.11275152, z: 1.453878}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4377797995229649606}
@@ -256,7 +256,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.15
+  m_Radius: 0.2
 --- !u!50 &8667027671599087835
 Rigidbody2D:
   serializedVersion: 5
@@ -302,6 +302,9 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 8
+  bulletPrefab: {fileID: 6596474327333792238, guid: 53d93bf4cf36d5d41abc96c11e6a551e, type: 3}
+  bulletForce: 8
+  bulletAmount: 8
 --- !u!114 &2138871946793719955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -363,8 +366,8 @@ Transform:
   m_GameObject: {fileID: 3935883119991616998}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.35952002, z: 0.3}
+  m_LocalPosition: {x: 0.0026868, y: 0.0037513, z: 0}
+  m_LocalScale: {x: 0.43616343, y: 0.5226982, z: 0.43616343}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4377797995229649606}
