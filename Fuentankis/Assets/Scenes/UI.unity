@@ -1950,7 +1950,7 @@ GameObject:
   - component: {fileID: 1809878576}
   - component: {fileID: 1809878575}
   m_Layer: 0
-  m_Name: Panel
+  m_Name: Panel_NameSelection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
