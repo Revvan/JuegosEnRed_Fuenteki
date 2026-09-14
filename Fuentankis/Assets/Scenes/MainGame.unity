@@ -5314,7 +5314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55e6b451ef4b46ab874b1c83fe57ff81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  minimumPlayers: 2
+  minimumPlayers: 1
   maximumPlayers: 12
   countdownSeconds: 3
   roundEndSeconds: 2
