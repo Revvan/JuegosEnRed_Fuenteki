@@ -1,50 +1,38 @@
+using System.Linq;
 using UnityEngine;
-using System.Collections.Generic;
-using Photon.Pun;
-using Photon.Realtime;
+using TMPro;
+using UnityEngine.UI;
 
-
+// Fixed scene rows with pagination; no runtime UI instantiation.
 public class UI_RoomLIst : MonoBehaviour
 {
-    [SerializeField] PhotonRoomSearcher Searcher;
-    [SerializeField] GameObject ButtomPrefab;
-
-
-    public List<GameObject> RoomButtomList;
-
-    public void Start()
+    [SerializeField] private PhotonRoomSearcher Searcher;
+    [SerializeField] private UI_RoomButtom[] rows;
+    [SerializeField] private TMP_Text pageText, emptyText;
+    [SerializeField] private Button previousButton, nextButton;
+    private int page;
+    private void Awake()
     {
-        //Validate
-        if (Searcher== null)
-            Debug.Log(name + ": PhotonRoomSearcherm not found");
-        if (ButtomPrefab== null)
-            Debug.Log(name + ": ButtomPrefab not found");
-
-        RoomButtomList = new List<GameObject>();
+        foreach (var row in rows) row.gameObject.SetActive(false);
+        emptyText.gameObject.SetActive(true);
     }
-
+    public void PreviousPage() { page = Mathf.Max(0, page - 1); Refresh_List(); }
+    public void NextPage() { page++; Refresh_List(); }
     public void Refresh_List()
     {
-        if (RoomButtomList.Count > 0)
+        if (rows == null || rows.Length == 0) return;
+        var rooms = Searcher.local_roomList.OrderBy(room => room.Name).ToArray();
+        int pages = Mathf.Max(1, Mathf.CeilToInt((float)rooms.Length / rows.Length));
+        page = Mathf.Clamp(page, 0, pages - 1);
+        for (int i = 0; i < rows.Length; i++)
         {
-            foreach(GameObject button in RoomButtomList)
-            {
-                Destroy(button);
-            }
-            RoomButtomList.Clear();
+            int index = page * rows.Length + i;
+            rows[i].gameObject.SetActive(index < rooms.Length);
+            if (index < rooms.Length) rows[i].Setup(rooms[index]);
         }
-
-        if (Searcher.local_roomList.Count == 0)
-        {
-            return;
-        }
-        foreach (RoomInfo room in Searcher.local_roomList)
-        {
-            
-            GameObject newButtom = Instantiate(ButtomPrefab, this.transform);
-            UI_RoomButtom RoomButtom = newButtom.GetComponent<UI_RoomButtom>();
-            RoomButtom.roomName = room.Name;
-            RoomButtom.Setup();
-        }
+        pageText.text = (page + 1) + " / " + pages;
+        emptyText.gameObject.SetActive(rooms.Length == 0);
+        previousButton.interactable = page > 0;
+        nextButton.interactable = page + 1 < pages;
     }
 }
