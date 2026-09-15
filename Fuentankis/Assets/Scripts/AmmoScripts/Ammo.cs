@@ -6,7 +6,7 @@ public class Ammo : MonoBehaviourPunCallbacks
     [SerializeField] private bool isGrenade = false;
     private PhotonView myView;
 
-    private void Start()
+    private void Awake()
     {
         myView = GetComponent<PhotonView>();
     }

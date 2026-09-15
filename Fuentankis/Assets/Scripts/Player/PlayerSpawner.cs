@@ -31,14 +31,17 @@ public class PlayerSpawner : MonoBehaviourPun
     private void SpawnPlayer()
     {
         playerCount = PhotonNetwork.CurrentRoom.PlayerCount % spawnPoint.Count;
-        //Debug.Log("SpawnPlayer: "+ playerCount + " pos: " + spawnPoint[playerCount].name);
-        PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint[playerCount].position, Quaternion.identity);
+        var a = RandomSpawnPoint().position;
+        Debug.Log("SpawnPlayer: "+ playerCount + " pos: " + a);
+        PhotonNetwork.Instantiate(playerPrefab.name,a, Quaternion.identity);
+
 
     }
 
 
 
     private void PlayerJoinedRoom(){
+        Debug.Log("join room event");   
         if (spawned) return;
         spawned = true;
         SpawnPlayer();

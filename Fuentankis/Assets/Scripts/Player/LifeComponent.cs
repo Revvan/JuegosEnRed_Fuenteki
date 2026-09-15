@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class LifeComponent : MonoBehaviourPun, IPunObservable
 {
@@ -33,6 +34,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private GrenadeLauncher gLaunch;
     
     private PlayerSpawner spawner;
+    private GameManager match;
+    private ShieldSystem shield;
 
     private float NetActualLife;
     private float NetMaxLife;
@@ -41,6 +44,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private PhotonView myView;
 
     private bool isInvulnerable = false;
+    private float alphaValue = 1f;
+    private float netAlphaValue = 1f;
 
     public bool alive=true;
 
@@ -55,6 +60,10 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         pWep = GetComponent<PlayerWeapon>();
         gLaunch = GetComponent<GrenadeLauncher>();
         spawner = PlayerSpawner.Instance;
+        match = FindFirstObjectByType<GameManager>();
+        shield = GetComponent<ShieldSystem>();
+        // Room members receive player replicas before choosing to enter gameplay.
+        if (SceneManager.GetActiveScene().name != "MainGame") collision.enabled = false;
 
         if (photonView.IsMine)
         {
@@ -65,6 +74,9 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
     void Update()
     {
+        // Replicas retained across the RoomsScene -> MainGame transition need the new scene refs.
+        if (match == null) match = FindFirstObjectByType<GameManager>();
+        if (spawner == null) spawner = PlayerSpawner.Instance;
         if (photonView.IsMine)
         {
             if (alive && ActualLife <= 0)
@@ -78,6 +90,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             ActualLife = NetActualLife;
             MaxLife = NetMaxLife;
             alive = netAlive;
+            alphaValue = netAlphaValue;
         }
 
         text.text = string.IsNullOrWhiteSpace(myView.Owner.NickName)
@@ -85,10 +98,24 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             : myView.Owner.NickName;
         miniBar.fillAmount = ActualLife / MaxLife;
         StopActivity(alive);
+
+        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, alphaValue);
     }
 
     private void StopActivity(bool alv)
     {
+        bool canPlay = SceneManager.GetActiveScene().name == "MainGame" && (match == null || match.GameplayActive);
+        if (shield != null && myView.IsMine)
+        {
+            if ((!canPlay || !alv) && shield.isShieldActive) shield.HideShield();
+            shield.enabled = canPlay && alv;
+        }
+        if ((!canPlay || !alv) && myView.IsMine)
+        {
+            var body = GetComponent<Rigidbody2D>();
+            body.linearVelocity = Vector2.zero;
+            body.angularVelocity = 0;
+        }
         if(sprite != null) 
         {
             sprite.enabled = alv;
@@ -96,27 +123,27 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
 
         if (collision != null)
         {
-            collision.enabled = alv;
+            collision.enabled = alv && canPlay;
         }
 
         if (pMove != null)
         {
-            pMove.enabled = alv && myView.IsMine;
+            pMove.enabled = alv && myView.IsMine && canPlay;
         }
 
         if (pWeapCont != null)
         {
-            pWeapCont.enabled = alv && myView.IsMine;
+            pWeapCont.enabled = alv && myView.IsMine && canPlay;
         }
 
         if(pWep != null)
         { 
-            pWep.enabled = alv && myView.IsMine;
+            pWep.enabled = alv && myView.IsMine && canPlay;
         }
 
         if(gLaunch != null)
         {
-            gLaunch.enabled = alv && myView.IsMine;
+            gLaunch.enabled = alv && myView.IsMine && canPlay;
         }
     }
 
@@ -124,7 +151,8 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     {
         if(!alive) { return; }
         alive = false;
-        photonView.RPC(nameof(RPC_Death), RpcTarget.All, ++deathSequence,
+
+        photonView.RPC("RPC_Death", RpcTarget.All, ++deathSequence,
             LastAttackerActorNumber, lastAttackerName, PlayerName(myView.Owner), lethalCause);
         StartCoroutine(RespawnRoutine());
     }
@@ -132,6 +160,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
     private IEnumerator RespawnRoutine()
     {
         yield return new WaitForSeconds(respawnTime);
+        if (match != null && !match.GameplayActive) yield break;
 
         Transform spPoint = spawner.RandomSpawnPoint();
         ActualLife = MaxLife;
@@ -141,10 +170,12 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         myView.RPC("AddGrenade", RpcTarget.All, 1);
         myView.RPC("AddMainAmmo", RpcTarget.All, 4);
 
-        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 0.5f);
+        alphaValue = 0.5f;
+        netAlphaValue = alphaValue;
 
         yield return new WaitForSeconds(5f);
-        sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
+        alphaValue = 1f;
+        netAlphaValue = alphaValue;
         isInvulnerable = false;
     }
 
@@ -155,12 +186,14 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             stream.SendNext(ActualLife);
             stream.SendNext(MaxLife);
             stream.SendNext(alive);
+            stream.SendNext(alphaValue);
         }
         else
         {
             NetActualLife = (float)stream.ReceiveNext();
             NetMaxLife = (float)stream.ReceiveNext();
             netAlive = (bool)stream.ReceiveNext();
+            netAlphaValue = (float)stream.ReceiveNext();
         }
     }
 
@@ -176,7 +209,7 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
             return;
         }
 
-        if(isInvulnerable || !alive || ActualLife <= 0 || damage <= 0
+        if((match != null && !match.GameplayActive) || isInvulnerable || !alive || ActualLife <= 0 || damage <= 0
             || float.IsNaN(damage) || float.IsInfinity(damage) || info.Sender == null)
         {
             return;
@@ -190,16 +223,22 @@ public class LifeComponent : MonoBehaviourPun, IPunObservable
         }
 
         healthBar.fillAmount = ActualLife / MaxLife;
+        // Resolve accepted lethal hits now, before a frame boundary can end the round.
+        if (ActualLife <= 0) Die();
     }
 
     [PunRPC]
     public void RPC_Death(int sequence, int attacker, string attackerName,
         string victimName, int cause, PhotonMessageInfo info)
     {
+        Debug.Log("Muelto");
+        
         if (info.Sender != myView.Owner || sequence <= receivedDeathSequence) return;
         receivedDeathSequence = sequence;
         alive = false;
         netAlive = false;
+
+        StopActivity(false);
 
         var rb = GetComponent<Rigidbody2D>();
         if (rb != null)

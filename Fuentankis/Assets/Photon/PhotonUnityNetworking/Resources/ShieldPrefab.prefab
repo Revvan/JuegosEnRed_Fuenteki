@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9222010689914813145}
   - component: {fileID: 7433627694100842784}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ShieldRender
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,7 +102,7 @@ GameObject:
   - component: {fileID: 5789226735645127911}
   - component: {fileID: 3234801888033550804}
   - component: {fileID: 420463128168110517}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ShieldPrefab
   m_TagString: Shield
   m_Icon: {fileID: 0}

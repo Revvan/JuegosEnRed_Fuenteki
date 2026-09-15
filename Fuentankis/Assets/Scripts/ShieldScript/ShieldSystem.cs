@@ -140,17 +140,21 @@ public class ShieldSystem : MonoBehaviourPun, IPunObservable
     {
         if (index < 0 || index >= shieldObjects.Count)
         {
+            print("Shield segment index out of range: " + index);
             return;
         }
 
         if (IsSegmentDestroyed(index))
         {
+            print("Shield segment already destroyed: " + index);
             return;
         }
 
         SetSegmentDestroyed(index);
 
         shieldObjects[index].gameObject.SetActive(false);
+
+        print("Shield segment destroyed");
     }
 
     private void RebuildShield(int shieldSegments)
@@ -272,11 +276,17 @@ public class ShieldSystem : MonoBehaviourPun, IPunObservable
     public void ShieldTakeDamage(int segmentIndex)
     {
         if (!myView.IsMine)
+        {
             return;
+        }
 
         if (IsSegmentDestroyed(segmentIndex))
+        {
+            print("Segment already destroyed: " + segmentIndex);
             return;
+        }
 
+        print("ShieldTakeDamage called for segment: " + segmentIndex);
         DestroyShieldSegment(segmentIndex);
 
         myWeapon.RemoveAmmo(1);

@@ -42,7 +42,9 @@ public class Grenade : BulletBase
     public void Explode()
     {
         // The RPC reaches every client; only the owner produces gameplay effects.
-        if (!myView.IsMine || exploded) return;
+        if (!myView.IsMine || exploded) 
+            return;
+
         exploded = true;
         var damagedPlayers = new System.Collections.Generic.HashSet<int>();
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius, playerMask);
@@ -53,13 +55,15 @@ public class Grenade : BulletBase
             //if (hit.gameObject.CompareTag("Player"))
 
             PhotonView otherPV = hit.GetComponentInParent<PhotonView>();
-            if (otherPV != null && otherPV.GetComponent<LifeComponent>() != null
-                && damagedPlayers.Add(otherPV.ViewID))
+            
+            if (otherPV != null && otherPV.GetComponent<LifeComponent>() != null && damagedPlayers.Add(otherPV.ViewID))
+            {
                 otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage, 1);
+            }
         }
+
         SpawnBullets();
         PhotonNetwork.Destroy(gameObject);
-        
     }
     
     public void SpawnBullets()
@@ -67,14 +71,12 @@ public class Grenade : BulletBase
         for (int i = 1; i <= bulletAmount; i++)
         {
             Vector3 dir = CalcBulletDirection(i, bulletAmount);
-            Debug.Log(dir);
+            //Debug.Log(dir);
             float dirRot = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
             BulletBase bullet = PhotonNetwork.Instantiate(bulletPrefab.name, transform.position,
                 Quaternion.Euler(0, 0, dirRot), 0, new object[] { 1 }).GetComponent<BulletBase>();
             bullet.BulletImpulse(dir, bulletForce);
         }
-        
-
     }
 
     public Vector3 CalcBulletDirection(float bulletNum, float bulletTotal)

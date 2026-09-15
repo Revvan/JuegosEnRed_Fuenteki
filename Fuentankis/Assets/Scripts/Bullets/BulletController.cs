@@ -5,6 +5,7 @@ public class BulletController : BulletBase
 {
     [SerializeField] float lifetime = 5.0f;
     private float lifeStartTime = 0;
+    private bool net_destroyed = false;
 
     private void Awake()
     {
@@ -41,6 +42,11 @@ public class BulletController : BulletBase
         if (!myView.IsMine)
             return;
 
+        if (net_destroyed)
+        {
+            return;
+        }
+
         if (collision.gameObject.CompareTag("Player"))
         {
             PhotonView otherPV = collision.gameObject.GetComponent<PhotonView>();
@@ -53,6 +59,7 @@ public class BulletController : BulletBase
                 otherPV.RPC("RPC_DealDamage", RpcTarget.All, damage, cause);
 
                 PhotonNetwork.Destroy(gameObject);
+                net_destroyed = true;
             }
         }
 
@@ -78,10 +85,9 @@ public class BulletController : BulletBase
                 shieldSystem.photonView.RPC(nameof(ShieldSystem.ShieldTakeDamage), shieldSystem.photonView.Owner, shieldObject.SegmentIndex);
 
                 PhotonNetwork.Destroy(gameObject);
+                net_destroyed = true;
             }
         }
-
-
     }
 }
 
