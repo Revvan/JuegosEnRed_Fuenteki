@@ -24,7 +24,10 @@ public class PlayerMovement : MonoBehaviourPun
         if (!myView.IsMine)
         { return; }
 
-        ProcessMovement();
+        if (RaceManager.Instance.raceStarted)
+        {
+            ProcessMovement();
+        }
     }
 
     void ProcessMovement()
